@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AYB TERMINAL | Phase 2 Live</title>
+    <title>AYB TERMINAL | Secure Presale</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/6.7.0/ethers.umd.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Inter:wght@400;600&display=swap" rel="stylesheet">
     <style>
@@ -42,7 +42,7 @@
         <label style="font-size:0.7rem; color:#8b949e; letter-spacing:1px;">ENTER ETH AMOUNT</label>
         <input type="number" id="eth-input" placeholder="0.00" step="0.01">
         <p id="calc-text" style="font-size:0.8rem; color:var(--primary); margin-top:10px; font-weight:bold;">YOU RECEIVE: 0 AYB</p>
-        <button id="buy-btn" class="btn" style="margin-top:10px;">BUY NOW</button>
+        <button id="buy-btn" class="btn" style="margin-top:10px;">PURCHASE NOW</button>
     </div>
 
     <div id="status"></div>
@@ -53,12 +53,13 @@
     const ABI = ["function buyTokens() external payable"];
     const ARBITRUM_ID = "0xa4b1"; 
     
-    // Fixed Timer Date: 30 Days from today (March 22 + 30 = April 21)
+    // Set exact target date: April 21, 2026
     const COUNTDOWN_DATE = new Date("April 21, 2026 23:59:59").getTime();
 
-    function runTimer() {
+    function updateCountdown() {
         const now = new Date().getTime();
         const gap = COUNTDOWN_DATE - now;
+
         if (gap > 0) {
             document.getElementById('d').innerText = Math.floor(gap / (1000 * 60 * 60 * 24));
             document.getElementById('h').innerText = Math.floor((gap % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
@@ -66,8 +67,10 @@
             document.getElementById('s').innerText = Math.floor((gap % (1000 * 60)) / 1000);
         }
     }
-    setInterval(runTimer, 1000);
-    runTimer();
+    
+    // Start timer immediately and then every second
+    updateCountdown();
+    setInterval(updateCountdown, 1000);
 
     const connectBtn = document.getElementById('connect-btn');
     const statusBox = document.getElementById('status');
@@ -76,7 +79,6 @@
     function updateMsg(text, isError) {
         statusBox.innerText = text;
         statusBox.style.display = 'block';
-        statusBox.style.backgroundColor = isError ? 'rgba(255, 123, 114, 0.1)' : 'rgba(0, 255, 163, 0.1)';
         statusBox.style.borderColor = isError ? '#ff7b72' : '#00ffa3';
         statusBox.style.color = isError ? '#ff7b72' : '#00ffa3';
     }
@@ -86,7 +88,7 @@
     };
 
     connectBtn.onclick = async () => {
-        // Universal Injected Provider Check
+        // Universal Injected Provider (Works for Trust, MetaMask, OKX, etc.)
         const providerObj = window.ethereum || (window.trustwallet ? window.trustwallet : null);
         
         if (!providerObj) {
@@ -95,8 +97,8 @@
         }
 
         try {
-            updateMsg("Accessing Wallet...", false);
-            // Multi-Wallet Permission Call
+            updateMsg("Requesting Access...", false);
+            // Explicitly request permissions to force popup
             await providerObj.request({ method: 'wallet_requestPermissions', params: [{ eth_accounts: {} }] });
             const accounts = await providerObj.request({ method: 'eth_requestAccounts' });
             
@@ -110,7 +112,7 @@
 
             document.getElementById('auth-section').style.display = 'none';
             document.getElementById('buy-section').style.display = 'block';
-            updateMsg("Terminal Online", false);
+            updateMsg("Connected Successfully", false);
         } catch (err) {
             updateMsg(err.message, true);
         }
@@ -119,13 +121,12 @@
     document.getElementById('buy-btn').onclick = async () => {
         try {
             const ethVal = document.getElementById('eth-input').value;
-            if(!ethVal || ethVal <= 0) return updateMsg("Invalid ETH amount", true);
+            if(!ethVal || ethVal <= 0) return updateMsg("Enter valid ETH amount", true);
             
             const contract = new ethers.Contract(CONTRACT_ADDR, ABI, userSigner);
-            updateMsg("Awaiting Confirmation...", false);
+            updateMsg("Waiting for Confirmation...", false);
             
             const tx = await contract.buyTokens({ value: ethers.parseEther(ethVal) });
-            updateMsg("Transaction Pending...", false);
             await tx.wait();
             updateMsg("Purchase Success!", false);
         } catch (err) {
