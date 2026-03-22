@@ -3,8 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AYB TERMINAL | Phase 2</title>
-    <script src="https://cdn.jsdelivr.net/npm/ethers@6.7.0/dist/ethers.umd.min.js"></script>
+    <title>AYB TERMINAL | Phase 1</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/6.7.0/ethers.umd.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Inter:wght@400;600&display=swap" rel="stylesheet">
     <style>
         :root { --primary: #00ffa3; --bg: #0d1117; }
@@ -14,19 +14,17 @@
         .timer { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin: 20px 0; padding: 15px; background: rgba(0,0,0,0.2); border-radius: 12px; border: 1px solid #30363d; }
         .t-val { display: block; font-size: 1.2rem; font-weight: bold; color: var(--primary); font-family: 'Orbitron'; }
         .t-unit { font-size: 0.65rem; color: #8b949e; text-transform: uppercase; }
-        .input-group { background: #010409; border: 1px solid #30363d; padding: 12px; border-radius: 10px; margin: 20px 0; text-align: left; }
-        input { background: transparent; border: none; color: white; font-size: 1.2rem; width: 100%; outline: none; font-weight: bold; }
         .btn { background: var(--primary); color: #000; border: none; padding: 16px; border-radius: 10px; width: 100%; font-weight: 800; cursor: pointer; transition: 0.3s; font-size: 1rem; }
         .btn:hover { box-shadow: 0 0 20px rgba(0,255,163,0.4); }
-        #status { margin-top: 15px; font-size: 0.8rem; padding: 10px; border-radius: 8px; display: none; border: 1px solid transparent; word-break: break-all; }
+        #status { margin-top: 15px; font-size: 0.8rem; padding: 10px; display: none; border-radius: 8px; border: 1px solid; word-wrap: break-word; }
+        #b-area { display:none; margin-top: 20px; }
+        input { background: #010409; border: 1px solid #30363d; color: white; padding: 12px; border-radius: 10px; width: 90%; margin-bottom: 10px; font-size: 1.1rem; outline: none; }
     </style>
 </head>
 <body>
 
 <div class="card">
     <h1>AYB TERMINAL</h1>
-    <p style="color:#8b949e; font-size:0.85rem; margin-top:10px;">Phase 2 Closing In:</p>
-    
     <div class="timer">
         <div><span class="t-val" id="d">00</span><span class="t-unit">Days</span></div>
         <div><span class="t-val" id="h">00</span><span class="t-unit">Hrs</span></div>
@@ -34,16 +32,15 @@
         <div><span class="t-val" id="s">00</span><span class="t-unit">Sec</span></div>
     </div>
 
-    <div id="c-area"><button id="c-btn" class="btn">CONNECT WALLET</button></div>
+    <div id="c-area">
+        <button id="c-btn" class="btn">CONNECT WALLET</button>
+    </div>
 
-    <div id="b-area" style="display:none">
-        <div class="input-group">
-            <label style="font-size:0.7rem; color:#8b949e;">Amount (ETH)</label>
-            <input type="number" id="amt" placeholder="0.0" step="0.01">
-        </div>
-        <p id="res" style="font-size:0.8rem; color:#8b949e; margin-bottom:15px">You receive: 0 AYB</p>
+    <div id="b-area">
+        <input type="number" id="amt" placeholder="0.0 ETH" step="0.01">
         <button id="buy" class="btn">BUY TOKENS</button>
     </div>
+    
     <div id="status"></div>
 </div>
 
@@ -52,9 +49,8 @@
     const ABI = ["function buyTokens() external payable"];
     const NET_ID = "0xa4b1"; // Arbitrum One
     const TARGET = new Date("March 30, 2026 23:59:59").getTime();
-    const DAPP_URL = "yaznvip.github.io/ayb-presale/"; // Your Live URL
 
-    // Timer Logic
+    // Timer
     setInterval(() => {
         const now = new Date().getTime();
         const d = TARGET - now;
@@ -67,79 +63,63 @@
     }, 1000);
 
     const sDiv = document.getElementById('status');
-    function log(m, isErr) { 
-        sDiv.innerText = m; 
-        sDiv.style.display = 'block'; 
-        sDiv.style.borderColor = isErr ? '#f85149' : '#00ffa3'; 
-        sDiv.style.color = isErr ? '#f85149' : '#00ffa3'; 
+    function log(m, isErr) {
+        sDiv.innerText = m;
+        sDiv.style.display = 'block';
+        sDiv.style.color = isErr ? '#f85149' : '#00ffa3';
+        sDiv.style.borderColor = isErr ? '#f85149' : '#00ffa3';
     }
 
-    document.getElementById('amt').oninput = (e) => { 
-        document.getElementById('res').innerText = You receive: ${e.target.value * 100} AYB; 
-    };
-
+    // Main Connect Logic
     document.getElementById('c-btn').onclick = async () => {
-        const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
-
-        // Logic for Mobile Chrome (Deep Link)
-        if (isMobile && !window.ethereum) {
-            window.location.href = https://metamask.app.link/dapp/${DAPP_URL};
-            return;
-        }
-
-        if (window.ethereum) {
+        if (typeof window.ethereum !== 'undefined') {
             try {
-                // Request Account
-                const accs = await window.ethereum.request({ method: 'eth_requestAccounts' });
+                log("Requesting account...", false);
+                const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
                 
-                // Switch/Add Network (Arbitrum)
-                try {
-                    await window.ethereum.request({
-                        method: 'wallet_switchEthereumChain',
-                        params: [{ chainId: NET_ID }],
-                    });
-                } catch (err) {
-                    if (err.code === 4902) {
+                // Network check
+                const chainId = await window.ethereum.request({ method: 'eth_chainId' });
+                if (chainId !== NET_ID) {
+                    try {
                         await window.ethereum.request({
-                            method: 'wallet_addEthereumChain',
-                            params: [{
-                                chainId: NET_ID,
-                                chainName: 'Arbitrum One',
-                                nativeCurrency: { name: 'ETH', symbol: 'ETH', decimals: 18 },
-                                rpcUrls: ['https://arb1.arbitrum.io/rpc'],
-                                blockExplorerUrls: ['https://arbiscan.io']
-                            }]
+                            method: 'wallet_switchEthereumChain',
+                            params: [{ chainId: NET_ID }],
                         });
+                    } catch (err) {
+                        log("Please switch to Arbitrum network", true);
+                        return;
                     }
                 }
 
                 document.getElementById('c-area').style.display = 'none';
                 document.getElementById('b-area').style.display = 'block';
-                log("Connected: " + accs[0].slice(0,6), false);
-            } catch (e) {
-                log(e.message, true);
+                log("Connected: " + accounts[0].substring(0, 6), false);
+            } catch (error) {
+                log("Error: " + error.message, true);
             }
         } else {
-            log("Please use MetaMask Browser or App", true);
+            // Mobile Redirect Logic
+            const url = window.location.href.replace(/^https?:\/\//, '');
+            window.location.href = https://metamask.app.link/dapp/${url};
         }
     };
 
     document.getElementById('buy').onclick = async () => {
         try {
-            const v = document.getElementById('amt').value;
-            if(!v || v <= 0) return log("Enter amount", true);
-            
+            const val = document.getElementById('amt').value;
+            if(!val || val <= 0) return log("Enter valid amount", true);
+
             const provider = new ethers.BrowserProvider(window.ethereum);
             const signer = await provider.getSigner();
             const contract = new ethers.Contract(ADDR, ABI, signer);
-            
-            log("Check your wallet...", false);
-            const tx = await contract.buyTokens({ value: ethers.parseEther(v) });
-            log("Transaction Sent! Waiting...", false);
+
+            log("Confirming in wallet...", false);
+            const tx = await contract.buyTokens({ value: ethers.parseEther(val) });
+            log("Processing transaction...", false);
             await tx.wait();
-            log("Purchase Successful!", false);
+            log("Tokens purchased successfully!", false);
         } catch (e) {
-            log(e.reason || "Transaction failed", true);
+            log(e.reason || e.message || "Transaction failed", true);
         }
     };
 </script>
