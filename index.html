@@ -3,123 +3,118 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AYB Token Presale | Professional Terminal</title>
+    <title>AYB Token Presale</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/6.7.0/ethers.umd.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Inter:wght@300;500;700&display=swap" rel="stylesheet">
     <style>
-        :root { --primary: #00ffa3; --bg: #05070a; --card-bg: rgba(20, 25, 35, 0.8); }
-        body { background: var(--bg); color: white; font-family: 'Inter', sans-serif; margin: 0; display: flex; justify-content: center; align-items: center; min-height: 100vh; overflow: hidden; }
-        .bg-glow { position: absolute; width: 300px; height: 300px; background: var(--primary); filter: blur(150px); opacity: 0.1; border-radius: 50%; z-index: -1; }
-        
-        .container { background: var(--card-bg); border: 1px solid rgba(255, 255, 255, 0.1); backdrop-filter: blur(10px); padding: 2.5rem; border-radius: 24px; width: 100%; max-width: 420px; box-shadow: 0 25px 50px rgba(0,0,0,0.5); text-align: center; }
-        h1 { font-family: 'Orbitron', sans-serif; font-size: 1.8rem; margin-bottom: 0.5rem; color: var(--primary); text-shadow: 0 0 15px rgba(0,255,163,0.3); }
-        p { color: #848e9c; font-size: 0.9rem; margin-bottom: 2rem; }
-
-        .input-group { background: rgba(0,0,0,0.3); padding: 1rem; border-radius: 16px; border: 1px solid #2b2f36; margin-bottom: 1.5rem; text-align: left; }
-        label { font-size: 0.75rem; color: #848e9c; text-transform: uppercase; letter-spacing: 1px; }
-        input { background: transparent; border: none; color: white; font-size: 1.5rem; width: 100%; outline: none; margin-top: 5px; font-weight: bold; }
-        
-        .stats { display: flex; justify-content: space-between; margin-bottom: 1.5rem; font-size: 0.85rem; padding: 0 5px; }
-        
-        .btn { background: var(--primary); color: #000; border: none; padding: 16px; border-radius: 12px; width: 100%; font-weight: 800; cursor: pointer; transition: all 0.3s; font-size: 1rem; text-transform: uppercase; }
-        .btn:hover { transform: translateY(-2px); box-shadow: 0 10px 20px rgba(0,255,163,0.2); }
-        .btn:disabled { background: #2b2f36; color: #5e6673; cursor: not-allowed; }
-
-        #status { margin-top: 1rem; font-size: 0.8rem; padding: 10px; border-radius: 8px; display: none; }
-        .error { background: rgba(255, 77, 77, 0.1); color: #ff4d4d; border: 1px solid rgba(255, 77, 77, 0.2); }
-        .success { background: rgba(0, 255, 163, 0.1); color: var(--primary); border: 1px solid rgba(0, 255, 163, 0.2); }
+        :root { --primary-color: #00ffa3; --bg-dark: #0a0b0d; --card-bg: rgba(23, 28, 36, 0.95); }
+        body { background-color: var(--bg-dark); color: white; font-family: 'Inter', sans-serif; margin: 0; display: flex; justify-content: center; align-items: center; min-height: 100vh; }
+        .presale-card { background: var(--card-bg); border: 1px solid rgba(255, 255, 255, 0.1); padding: 2rem; border-radius: 20px; width: 100%; max-width: 400px; text-align: center; box-shadow: 0 20px 40px rgba(0,0,0,0.6); }
+        h1 { font-family: 'Orbitron', sans-serif; color: var(--primary-color); font-size: 1.5rem; margin-bottom: 1rem; }
+        .input-box { background: rgba(0,0,0,0.2); border: 1px solid #333; padding: 1rem; border-radius: 12px; margin: 1.5rem 0; text-align: left; }
+        label { font-size: 0.7rem; color: #888; text-transform: uppercase; }
+        input { background: transparent; border: none; color: white; font-size: 1.2rem; width: 100%; outline: none; margin-top: 5px; }
+        .info-row { display: flex; justify-content: space-between; font-size: 0.8rem; color: #ccc; margin-bottom: 1rem; }
+        .main-btn { background: var(--primary-color); color: black; border: none; padding: 1rem; border-radius: 10px; width: 100%; font-weight: bold; cursor: pointer; font-size: 1rem; transition: 0.3s; }
+        .main-btn:hover { opacity: 0.9; transform: scale(0.98); }
+        #status-msg { margin-top: 1rem; font-size: 0.8rem; padding: 8px; border-radius: 5px; display: none; }
+        .err { color: #ff4d4d; border: 1px solid #ff4d4d; }
+        .ok { color: var(--primary-color); border: 1px solid var(--primary-color); }
     </style>
 </head>
 <body>
 
-<div class="bg-glow"></div>
-<div class="container">
+<div class="presale-card">
     <h1>AYB TERMINAL</h1>
-    <p>Official Whitelist Presale</p>
+    <p style="color: #888; font-size: 0.9rem;">Whitelisted Investors Only</p>
 
-    <div id="setupArea">
-        <button id="connectBtn" class="btn">Connect Wallet</button>
+    <div id="connect-section">
+        <button id="connect-wallet" class="main-btn">CONNECT WALLET</button>
     </div>
 
-    <div id="buyArea" style="display: none;">
-        <div class="input-group">
-            <label>Amount to Pay (ETH)</label>
-            <input type="number" id="ethAmount" placeholder="0.0" step="0.01" min="0.01">
+    <div id="buy-section" style="display: none;">
+        <div class="input-box">
+            <label>Investment Amount (ETH)</label>
+            <input type="number" id="eth-input" placeholder="0.00" step="0.01">
         </div>
-        
-        <div class="stats">
+        <div class="info-row">
             <span>Price: 0.01 ETH</span>
-            <span id="tokenReceive">You get: 0 AYB</span>
+            <span id="token-calc">You receive: 0 AYB</span>
         </div>
-
-        <button id="buyBtn" class="btn">Buy Tokens Now</button>
+        <button id="buy-btn" class="main-btn">PURCHASE NOW</button>
     </div>
 
-    <div id="status"></div>
+    <div id="status-msg"></div>
 </div>
 
 <script>
-    const contractAddress = "0xE6bBb6A5904045C4807C9139Ad2E7C5EcFCB0F94";
-    const abi = ["function buyTokens() external payable"];
-    const ARBITRUM_ID = "0xa4b1";
+    const CONTRACT_ADDR = "0xE6bBb6A5904045C4807C9139Ad2E7C5EcFCB0F94";
+    const ABI = ["function buyTokens() external payable"];
+    const ARBITRUM_CHAIN_ID = "0xa4b1";
 
-    const connectBtn = document.getElementById('connectBtn');
-    const buyBtn = document.getElementById('buyBtn');
-    const ethInput = document.getElementById('ethAmount');
-    const statusDiv = document.getElementById('status');
+    const connectBtn = document.getElementById('connect-wallet');
+    const buySection = document.getElementById('buy-section');
+    const connectSection = document.getElementById('connect-section');
+    const ethInput = document.getElementById('eth-input');
+    const statusMsg = document.getElementById('status-msg');
 
-    function showStatus(msg, type) {
-        statusDiv.innerText = msg;
-        statusDiv.className = type;
-        statusDiv.style.display = 'block';
+    function updateStatus(text, isError) {
+        statusMsg.innerText = text;
+        statusMsg.className = isError ? 'err' : 'ok';
+        statusMsg.style.display = 'block';
     }
 
     ethInput.oninput = () => {
-        const amount = ethInput.value || 0;
-        document.getElementById('tokenReceive').innerText = You get: ${amount * 100} AYB;
+        const val = ethInput.value || 0;
+        document.getElementById('token-calc').innerText = You receive: ${val * 100} AYB;
     };
 
     connectBtn.onclick = async () => {
-        if (!window.ethereum) return alert("MetaMask not found!");
-        
-        try {
-            const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
-            const chainId = await window.ethereum.request({ method: 'eth_chainId' });
+        if (window.ethereum) {
+            try {
+                // Force popup to show in Chrome
+                await window.ethereum.request({ method: 'wallet_requestPermissions', params: [{ eth_accounts: {} }] });
+                const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
+                
+                const chainId = await window.ethereum.request({ method: 'eth_chainId' });
+                if (chainId !== ARBITRUM_CHAIN_ID) {
+                    await window.ethereum.request({
+                        method: 'wallet_switchEthereumChain',
+                        params: [{ chainId: ARBITRUM_CHAIN_ID }],
+                    });
+                }
 
-            if (chainId !== ARBITRUM_ID) {
-                await window.ethereum.request({
-                    method: 'wallet_switchEthereumChain',
-                    params: [{ chainId: ARBITRUM_ID }],
-                });
+                connectSection.style.display = 'none';
+                buySection.style.display = 'block';
+                updateStatus("Wallet Connected", false);
+            } catch (err) {
+                updateStatus("Connection failed: " + err.message, true);
             }
-
-            document.getElementById('setupArea').style.display = 'none';
-            document.getElementById('buyArea').style.display = 'block';
-            showStatus("Wallet Connected to Arbitrum", "success");
-        } catch (err) {
-            showStatus(err.message, "error");
+        } else {
+            // Deep link for mobile Chrome users
+            const link = "https://metamask.app.link/dapp/" + window.location.href.split('://')[1];
+            window.location.href = link;
         }
     };
 
-    buyBtn.onclick = async () => {
+    document.getElementById('buy-btn').onclick = async () => {
         try {
             const amount = ethInput.value;
-            if (amount <= 0) return showStatus("Please enter an amount", "error");
+            if (!amount || amount <= 0) return updateStatus("Enter valid amount", true);
 
             const provider = new ethers.BrowserProvider(window.ethereum);
             const signer = await provider.getSigner();
-            const contract = new ethers.Contract(contractAddress, abi, signer);
+            const contract = new ethers.Contract(CONTRACT_ADDR, ABI, signer);
 
-            showStatus("Confirming in Wallet...", "success");
+            updateStatus("Please confirm in MetaMask...", false);
             const tx = await contract.buyTokens({ value: ethers.parseEther(amount) });
-            
-            showStatus("Transaction Sent! Waiting for block...", "success");
             await tx.wait();
-            showStatus("Purchase Successful!", "success");
+            updateStatus("Purchase successful!", false);
         } catch (err) {
-            showStatus("Purchase Failed: " + (err.reason || err.message), "error");
+            updateStatus("Error: " + (err.reason || err.message), true);
         }
     };
 </script>
+
 </body>
 </html>
