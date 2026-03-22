@@ -3,29 +3,29 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AYB TERMINAL | Phase 2</title>
+    <title>AYB TERMINAL | Secure Node</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/6.7.0/ethers.umd.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Inter:wght@400;600&display=swap" rel="stylesheet">
     <style>
         :root { --primary: #00ffa3; --bg: #0a0c10; --card: #161b22; }
         body { background: var(--bg); color: white; font-family: 'Inter', sans-serif; margin: 0; display: flex; justify-content: center; align-items: center; min-height: 100vh; text-align: center; }
         .card { background: var(--card); border: 1px solid #30363d; padding: 2.5rem; border-radius: 20px; width: 100%; max-width: 400px; box-shadow: 0 20px 50px rgba(0,0,0,0.5); }
-        h1 { font-family: 'Orbitron', sans-serif; color: var(--primary); font-size: 1.5rem; margin: 0; }
-        .timer { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin: 20px 0; padding: 15px; background: rgba(0,0,0,0.2); border-radius: 12px; border: 1px solid #30363d; }
+        h1 { font-family: 'Orbitron', sans-serif; color: var(--primary); font-size: 1.5rem; margin-bottom: 10px; }
+        .timer { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-bottom: 25px; padding: 15px; background: rgba(0,0,0,0.2); border-radius: 12px; border: 1px solid #30363d; }
         .t-val { display: block; font-size: 1.2rem; font-weight: bold; color: var(--primary); font-family: 'Orbitron'; }
         .t-unit { font-size: 0.6rem; color: #8b949e; text-transform: uppercase; }
-        .btn { background: var(--primary); color: #000; border: none; padding: 18px; border-radius: 12px; width: 100%; font-weight: 800; cursor: pointer; transition: 0.3s; font-size: 1rem; }
-        .btn:hover { box-shadow: 0 0 20px rgba(0,255,163,0.4); transform: scale(1.02); }
-        #status { margin-top: 15px; font-size: 0.8rem; padding: 10px; border-radius: 8px; display: none; border: 1px solid transparent; }
+        .btn { background: var(--primary); color: #000; border: none; padding: 18px; border-radius: 12px; width: 100%; font-weight: 800; cursor: pointer; transition: 0.3s; font-size: 1rem; text-transform: uppercase; }
+        .btn:hover { box-shadow: 0 0 20px rgba(0,255,163,0.4); transform: translateY(-2px); }
         .input-group { background: #010409; border: 1px solid #30363d; padding: 12px; border-radius: 10px; margin: 20px 0; text-align: left; display: none; }
         input { background: transparent; border: none; color: white; font-size: 1.2rem; width: 100%; outline: none; font-weight: bold; }
+        #status { margin-top: 15px; font-size: 0.8rem; display: none; padding: 10px; border-radius: 8px; border: 1px solid transparent; }
     </style>
 </head>
 <body>
 
 <div class="card">
     <h1>AYB TERMINAL</h1>
-    <p style="color:#8b949e; font-size:0.85rem; margin-top:10px;">Phase 2 Closing In:</p>
+    <p style="color:#8b949e; font-size:0.8rem; margin-bottom:15px;">PHASE 2 CLOSING IN:</p>
     
     <div class="timer">
         <div><span class="t-val" id="d">00</span><span class="t-unit">Days</span></div>
@@ -34,13 +34,13 @@
         <div><span class="t-val" id="s">00</span><span class="t-unit">Sec</span></div>
     </div>
 
-    <button id="connect-btn" class="btn">CONNECT WALLET</button>
+    <button id="connect-btn" class="btn">Connect Wallet</button>
 
     <div id="buy-area" class="input-group">
-        <label style="font-size:0.7rem; color:#8b949e;">Amount (ETH)</label>
-        <input type="number" id="eth-amt" placeholder="0.0" step="0.01">
-        <p id="calc" style="font-size:0.8rem; color:#8b949e; margin-top:10px">Receive: 0 AYB</p>
-        <button id="buy-btn" class="btn">BUY NOW</button>
+        <label style="font-size:0.7rem; color:#8b949e;">INVESTMENT AMOUNT (ETH)</label>
+        <input type="number" id="eth-amt" placeholder="0.00" step="0.01">
+        <p id="calc" style="font-size:0.8rem; color:#8b949e; margin-top:10px">ESTIMATED: 0 AYB</p>
+        <button id="buy-btn" class="btn">PURCHASE NOW</button>
     </div>
     <div id="status"></div>
 </div>
@@ -51,22 +51,24 @@
     const NET = "0xa4b1"; 
     const TARGET = new Date("March 30, 2026 23:59:59").getTime();
 
-    // Timer Logic
-    setInterval(() => {
+    // Timer Implementation
+    function updateTimer() {
         const now = new Date().getTime();
         const d = TARGET - now;
         if(d > 0) {
-            document.getElementById('d').innerText = Math.floor(d/(86400000));
-            document.getElementById('h').innerText = Math.floor((d%86400000)/3600000);
-            document.getElementById('m').innerText = Math.floor((d%3600000)/60000);
-            document.getElementById('s').innerText = Math.floor((d%60000)/1000);
+            document.getElementById('d').innerText = Math.floor(d/(1000*60*60*24));
+            document.getElementById('h').innerText = Math.floor((d%(1000*60*60*24))/(1000*60*60));
+            document.getElementById('m').innerText = Math.floor((d%(1000*60*60))/(1000*60));
+            document.getElementById('s').innerText = Math.floor((d%(1000*60))/1000);
         }
-    }, 1000);
+    }
+    setInterval(updateTimer, 1000);
+    updateTimer();
 
     const connectBtn = document.getElementById('connect-btn');
     const statusDiv = document.getElementById('status');
 
-    function log(m, isErr) {
+    function notify(m, isErr) {
         statusDiv.innerText = m;
         statusDiv.style.display = 'block';
         statusDiv.style.color = isErr ? '#ff7b72' : '#00ffa3';
@@ -74,16 +76,17 @@
     }
 
     document.getElementById('eth-amt').oninput = (e) => {
-        document.getElementById('calc').innerText = Receive: ${e.target.value * 100} AYB;
+        document.getElementById('calc').innerText = ESTIMATED: ${e.target.value * 100} AYB;
     };
 
     connectBtn.onclick = async () => {
-        if (!window.ethereum) {
+        if (typeof window.ethereum === 'undefined') {
             window.location.href = "https://metamask.app.link/dapp/yaznvip.github.io/ayb-presale/";
             return;
         }
         try {
-            log("Opening Wallet...", false);
+            notify("Waking up wallet...", false);
+            // التقنية القسرية: طلب الأذونات الصريح لكسر تجميد المتصفح
             await window.ethereum.request({ method: 'wallet_requestPermissions', params: [{ eth_accounts: {} }] });
             const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
             
@@ -94,22 +97,22 @@
 
             connectBtn.style.display = 'none';
             document.getElementById('buy-area').style.display = 'block';
-            log("Connected: " + accounts[0].substring(0,6), false);
-        } catch (e) { log(e.message, true); }
+            notify("System Connected", false);
+        } catch (e) { notify(e.message, true); }
     };
 
     document.getElementById('buy-btn').onclick = async () => {
         try {
             const val = document.getElementById('eth-amt').value;
-            if(!val || val <= 0) return log("Invalid Amount", true);
+            if(!val || val <= 0) return notify("Enter valid amount", true);
             const provider = new ethers.BrowserProvider(window.ethereum);
             const signer = await provider.getSigner();
             const contract = new ethers.Contract(ADDR, ABI, signer);
+            notify("Confirming transaction...", false);
             const tx = await contract.buyTokens({ value: ethers.parseEther(val) });
-            log("Transaction Sent...", false);
             await tx.wait();
-            log("Success!", false);
-        } catch (e) { log(e.reason || "Error", true); }
+            notify("Purchase Successful!", false);
+        } catch (e) { notify(e.reason || "Check Whitelist Status", true); }
     };
 </script>
 </body>
