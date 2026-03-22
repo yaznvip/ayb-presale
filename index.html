@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AYB TERMINAL | Secure Node</title>
+    <title>AYB TERMINAL | Universal Access</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/6.7.0/ethers.umd.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Inter:wght@400;600&display=swap" rel="stylesheet">
     <style>
@@ -14,7 +14,7 @@
         .timer { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-bottom: 25px; padding: 15px; background: rgba(0,0,0,0.2); border-radius: 12px; border: 1px solid #30363d; }
         .t-val { display: block; font-size: 1.2rem; font-weight: bold; color: var(--primary); font-family: 'Orbitron'; }
         .t-unit { font-size: 0.6rem; color: #8b949e; text-transform: uppercase; }
-        .btn { background: var(--primary); color: #000; border: none; padding: 18px; border-radius: 12px; width: 100%; font-weight: 800; cursor: pointer; transition: 0.3s; font-size: 1rem; text-transform: uppercase; }
+        .btn { background: var(--primary); color: #000; border: none; padding: 18px; border-radius: 12px; width: 100%; font-weight: 800; cursor: pointer; transition: 0.3s; font-size: 1rem; text-transform: uppercase; margin-bottom: 10px; }
         .btn:hover { box-shadow: 0 0 20px rgba(0,255,163,0.4); transform: translateY(-2px); }
         .input-group { background: #010409; border: 1px solid #30363d; padding: 12px; border-radius: 10px; margin: 20px 0; text-align: left; display: none; }
         input { background: transparent; border: none; color: white; font-size: 1.2rem; width: 100%; outline: none; font-weight: bold; }
@@ -25,7 +25,7 @@
 
 <div class="card">
     <h1>AYB TERMINAL</h1>
-    <p style="color:#8b949e; font-size:0.8rem; margin-bottom:15px;">PHASE 2 CLOSING IN:</p>
+    <p style="color:#8b949e; font-size:0.8rem; margin-bottom:15px;">PHASE 2 ENDS IN:</p>
     
     <div class="timer">
         <div><span class="t-val" id="d">00</span><span class="t-unit">Days</span></div>
@@ -34,10 +34,12 @@
         <div><span class="t-val" id="s">00</span><span class="t-unit">Sec</span></div>
     </div>
 
-    <button id="connect-btn" class="btn">Connect Wallet</button>
+    <div id="auth-area">
+        <button id="connect-btn" class="btn">Connect Wallet</button>
+    </div>
 
     <div id="buy-area" class="input-group">
-        <label style="font-size:0.7rem; color:#8b949e;">INVESTMENT AMOUNT (ETH)</label>
+        <label style="font-size:0.7rem; color:#8b949e;">INVESTMENT (ETH)</label>
         <input type="number" id="eth-amt" placeholder="0.00" step="0.01">
         <p id="calc" style="font-size:0.8rem; color:#8b949e; margin-top:10px">ESTIMATED: 0 AYB</p>
         <button id="buy-btn" class="btn">PURCHASE NOW</button>
@@ -48,10 +50,11 @@
 <script>
     const ADDR = "0xE6bBb6A5904045C4807C9139Ad2E7C5EcFCB0F94";
     const ABI = ["function buyTokens() external payable"];
-    const NET = "0xa4b1"; 
-    const TARGET = new Date("March 30, 2026 23:59:59").getTime();
+    const NET_HEX = "0xa4b1"; 
+    
+    // Updated Target: April 22, 2026
+    const TARGET = new Date("April 22, 2026 23:59:59").getTime();
 
-    // Timer Implementation
     function updateTimer() {
         const now = new Date().getTime();
         const d = TARGET - now;
@@ -67,6 +70,7 @@
 
     const connectBtn = document.getElementById('connect-btn');
     const statusDiv = document.getElementById('status');
+    let provider, signer;
 
     function notify(m, isErr) {
         statusDiv.innerText = m;
@@ -79,40 +83,52 @@
         document.getElementById('calc').innerText = ESTIMATED: ${e.target.value * 100} AYB;
     };
 
+    // Universal Discovery Logic
     connectBtn.onclick = async () => {
-        if (typeof window.ethereum === 'undefined') {
-            window.location.href = "https://metamask.app.link/dapp/yaznvip.github.io/ayb-presale/";
-            return;
-        }
-        try {
-            notify("Waking up wallet...", false);
-            // التقنية القسرية: طلب الأذونات الصريح لكسر تجميد المتصفح
-            await window.ethereum.request({ method: 'wallet_requestPermissions', params: [{ eth_accounts: {} }] });
-            const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
-            
-            const chainId = await window.ethereum.request({ method: 'eth_chainId' });
-            if (chainId !== NET) {
-                await window.ethereum.request({ method: 'wallet_switchEthereumChain', params: [{ chainId: NET }] });
-            }
+        // This checks for ANY injected wallet (MetaMask, Trust, OKX, Binance, etc.)
+        if (window.ethereum) {
+            try {
+                notify("Connecting to Wallet...", false);
+                
+                // Request access to ANY injected provider
+                await window.ethereum.request({ method: 'wallet_requestPermissions', params: [{ eth_accounts: {} }] });
+                const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
+                
+                // Check and Switch Network
+                const chainId = await window.ethereum.request({ method: 'eth_chainId' });
+                if (chainId !== NET_HEX) {
+                    try {
+                        await window.ethereum.request({ method: 'wallet_switchEthereumChain', params: [{ chainId: NET_HEX }] });
+                    } catch (switchError) {
+                        notify("Please switch to Arbitrum Network", true);
+                        return;
+                    }
+                }
 
-            connectBtn.style.display = 'none';
-            document.getElementById('buy-area').style.display = 'block';
-            notify("System Connected", false);
-        } catch (e) { notify(e.message, true); }
+                provider = new ethers.BrowserProvider(window.ethereum);
+                signer = await provider.getSigner();
+
+                document.getElementById('auth-area').style.display = 'none';
+                document.getElementById('buy-area').style.display = 'block';
+                notify("Terminal Connected", false);
+            } catch (e) { notify(e.message, true); }
+        } else {
+            notify("No Wallet Found. Please install Trust Wallet or MetaMask.", true);
+        }
     };
 
     document.getElementById('buy-btn').onclick = async () => {
         try {
             const val = document.getElementById('eth-amt').value;
             if(!val || val <= 0) return notify("Enter valid amount", true);
-            const provider = new ethers.BrowserProvider(window.ethereum);
-            const signer = await provider.getSigner();
+            
             const contract = new ethers.Contract(ADDR, ABI, signer);
-            notify("Confirming transaction...", false);
+            notify("Awaiting Confirmation...", false);
+            
             const tx = await contract.buyTokens({ value: ethers.parseEther(val) });
             await tx.wait();
             notify("Purchase Successful!", false);
-        } catch (e) { notify(e.reason || "Check Whitelist Status", true); }
+        } catch (e) { notify(e.reason || "Transaction Denied", true); }
     };
 </script>
 </body>
