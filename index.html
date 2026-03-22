@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AYB Token Dashboard</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/6.7.0/ethers.umd.min.js"></script>
+    <style>
+        :root { --primary: #00ff88; --bg: #0b0e11; --card: #161a1e; }
+        body { background: var(--bg); color: white; font-family: 'Inter', sans-serif; margin: 0; display: flex; justify-content: center; align-items: center; min-height: 100vh; }
+        .dashboard { background: var(--card); border: 1px solid #2b2f36; padding: 2rem; border-radius: 1.25rem; width: 400px; text-align: center; box-shadow: 0 20px 40px rgba(0,0,0,0.4); }
+        .status-dot { height: 10px; width: 10px; border-radius: 50%; display: inline-block; margin-right: 5px; }
+        .connected { background: var(--primary); }
+        .disconnected { background: #ff4d4d; }
+        h1 { font-size: 1.5rem; margin-bottom: 0.5rem; letter-spacing: 1px; }
+        .info-box { background: #1e2329; padding: 1rem; border-radius: 0.75rem; margin: 1.5rem 0; font-size: 0.9rem; border: 1px solid #2b2f36; }
+        button { background: var(--primary); color: black; border: none; padding: 12px; border-radius: 0.5rem; width: 100%; font-weight: bold; cursor: pointer; transition: 0.2s; font-size: 1rem; }
+        button:hover { transform: scale(1.02); filter: brightness(1.1); }
+        input { width: 100%; padding: 12px; margin: 10px 0; border-radius: 0.5rem; border: 1px solid #2b2f36; background: #0b0e11; color: white; box-sizing: border-box; }
+        #log { font-size: 0.75rem; color: #848e9c; margin-top: 1rem; }
+    </style>
+</head>
+<body>
+
+<div class="dashboard">
+    <h1>AYB TERMINAL</h1>
+    <div id="networkStatus"><span class="status-dot disconnected"></span> <span id="netName">Not Connected</span></div>
+    
+    <div class="info-box">
+        <div>Price: 0.01 ETH</div>
+        <div id="walletAddr" style="font-size: 0.7rem; color: var(--primary); margin-top: 5px;"></div>
+    </div>
+
+    <button id="connectBtn">CONNECT WALLET</button>
+
+    <div id="actionArea" style="display: none;">
+        <input type="number" id="ethInput" placeholder="Amount ETH" step="0.01">
+        <button id="buyBtn">PURCHASE TOKENS</button>
+    </div>
+
+    <div id="log">Logs: System Ready</div>
+</div>
+
+<script>
+    const ARBITRUM_MAINNET_ID = '0xa4b1'; // Arbitrum One
+    const contractAddress = "0xE6bBb6A5904045C4807C9139Ad2E7C5EcFCB0F94";
+    const abi = ["function buyTokens() external payable"];
+
+    async function checkNetwork() {
+        const chainId = await window.ethereum.request({ method: 'eth_chainId' });
+        if (chainId !== ARBITRUM_MAINNET_ID) {
+            try {
+                await window.ethereum.request({
+                    method: 'wallet_switchEthereumChain',
+                    params: [{ chainId: ARBITRUM_MAINNET_ID }],
+                });
+            } catch (err) {
+                if (err.code === 4902) {
+                    alert("Please add Arbitrum Network to your MetaMask");
+                }
+            }
+        }
+    }
+
+    document.getElementById('connectBtn').onclick = async () => {
+        if (window.ethereum) {
+            try {
+                await checkNetwork();
+                const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
+                document.getElementById('walletAddr').innerText = accounts[0];
+                document.getElementById('netName').innerText = "Arbitrum Active";
+                document.querySelector('.status-dot').className = "status-dot connected";
+                document.getElementById('connectBtn').style.display = 'none';
+                document.getElementById('actionArea').style.display = 'block';
+                document.getElementById('log').innerText = "Logs: Wallet Linked Successfully";
+            } catch (error) {
+                document.getElementById('log').innerText = "Error: " + error.message;
+            }
+        } else {
+            alert("MetaMask not detected");
+        }
+    };
+
+    document.getElementById('buyBtn').onclick = async () => {
+        try {
+            const val = document.getElementById('ethInput').value;
+            if(!val) return;
+            const provider = new ethers.BrowserProvider(window.ethereum);
+            const signer = await provider.getSigner();
+            const contract = new ethers.Contract(contractAddress, abi, signer);
+
+            const tx = await contract.buyTokens({ value: ethers.parseEther(val) });
+            document.getElementById('log').innerText = "Logs: Transaction Sent...";
+            await tx.wait();
+            document.getElementById('log').innerText = "Logs: Purchase Complete!";
+        } catch (e) {
+            alert("Failed: " + e.message);
+        }
+    };
+</script>
+</body>
+</html>
