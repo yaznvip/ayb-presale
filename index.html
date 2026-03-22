@@ -18,7 +18,7 @@
         input { background: transparent; border: none; color: white; font-size: 1.2rem; width: 100%; outline: none; font-weight: bold; }
         .btn { background: var(--primary); color: #000; border: none; padding: 16px; border-radius: 10px; width: 100%; font-weight: 800; cursor: pointer; transition: 0.3s; font-size: 1rem; }
         .btn:hover { box-shadow: 0 0 20px rgba(0,255,163,0.4); }
-        #status { margin-top: 15px; font-size: 0.8rem; padding: 10px; border-radius: 8px; display: none; border: 1px solid transparent; }
+        #status { margin-top: 15px; font-size: 0.8rem; padding: 10px; border-radius: 8px; display: none; border: 1px solid transparent; word-break: break-all; }
     </style>
 </head>
 <body>
@@ -50,15 +50,16 @@
 <script>
     const ADDR = "0xE6bBb6A5904045C4807C9139Ad2E7C5EcFCB0F94";
     const ABI = ["function buyTokens() external payable"];
-    const NET = "0xa4b1"; 
+    const NET_ID = "0xa4b1"; // Arbitrum One
     const TARGET = new Date("March 30, 2026 23:59:59").getTime();
+    const DAPP_URL = "yaznvip.github.io/ayb-presale/"; // Your Live URL
 
-    // Timer logic
+    // Timer Logic
     setInterval(() => {
         const now = new Date().getTime();
         const d = TARGET - now;
         if(d > 0) {
-            document.getElementById('d').innerText = Math.floor(d/(86400000));
+            document.getElementById('d').innerText = Math.floor(d/86400000);
             document.getElementById('h').innerText = Math.floor((d%86400000)/3600000);
             document.getElementById('m').innerText = Math.floor((d%3600000)/60000);
             document.getElementById('s').innerText = Math.floor((d%60000)/1000);
@@ -66,34 +67,80 @@
     }, 1000);
 
     const sDiv = document.getElementById('status');
-    function log(m, e) { sDiv.innerText = m; sDiv.style.display = 'block'; sDiv.style.borderColor = e ? '#f85149' : '#00ffa3'; sDiv.style.color = e ? '#f85149' : '#00ffa3'; }
+    function log(m, isErr) { 
+        sDiv.innerText = m; 
+        sDiv.style.display = 'block'; 
+        sDiv.style.borderColor = isErr ? '#f85149' : '#00ffa3'; 
+        sDiv.style.color = isErr ? '#f85149' : '#00ffa3'; 
+    }
 
-    document.getElementById('amt').oninput = (e) => { document.getElementById('res').innerText = You receive: ${e.target.value * 100} AYB; };
+    document.getElementById('amt').oninput = (e) => { 
+        document.getElementById('res').innerText = You receive: ${e.target.value * 100} AYB; 
+    };
 
     document.getElementById('c-btn').onclick = async () => {
-        if (!window.ethereum) return window.open("https://metamask.app.link/dapp/yaznvip.github.io/ayb-presale/", "_blank");
-        try {
-            const accs = await window.ethereum.request({ method: 'eth_requestAccounts' });
-            const chain = await window.ethereum.request({ method: 'eth_chainId' });
-            if (chain !== NET) await window.ethereum.request({ method: 'wallet_switchEthereumChain', params: [{ chainId: NET }] });
-            document.getElementById('c-area').style.display = 'none';
-            document.getElementById('b-area').style.display = 'block';
-            log("Connected: " + accs[0].slice(0,6), false);
-        } catch (e) { log(e.message, true); }
+        const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+
+        // Logic for Mobile Chrome (Deep Link)
+        if (isMobile && !window.ethereum) {
+            window.location.href = https://metamask.app.link/dapp/${DAPP_URL};
+            return;
+        }
+
+        if (window.ethereum) {
+            try {
+                // Request Account
+                const accs = await window.ethereum.request({ method: 'eth_requestAccounts' });
+                
+                // Switch/Add Network (Arbitrum)
+                try {
+                    await window.ethereum.request({
+                        method: 'wallet_switchEthereumChain',
+                        params: [{ chainId: NET_ID }],
+                    });
+                } catch (err) {
+                    if (err.code === 4902) {
+                        await window.ethereum.request({
+                            method: 'wallet_addEthereumChain',
+                            params: [{
+                                chainId: NET_ID,
+                                chainName: 'Arbitrum One',
+                                nativeCurrency: { name: 'ETH', symbol: 'ETH', decimals: 18 },
+                                rpcUrls: ['https://arb1.arbitrum.io/rpc'],
+                                blockExplorerUrls: ['https://arbiscan.io']
+                            }]
+                        });
+                    }
+                }
+
+                document.getElementById('c-area').style.display = 'none';
+                document.getElementById('b-area').style.display = 'block';
+                log("Connected: " + accs[0].slice(0,6), false);
+            } catch (e) {
+                log(e.message, true);
+            }
+        } else {
+            log("Please use MetaMask Browser or App", true);
+        }
     };
 
     document.getElementById('buy').onclick = async () => {
         try {
             const v = document.getElementById('amt').value;
             if(!v || v <= 0) return log("Enter amount", true);
-            const p = new ethers.BrowserProvider(window.ethereum);
-            const signer = await p.getSigner();
-            const con = new ethers.Contract(ADDR, ABI, signer);
+            
+            const provider = new ethers.BrowserProvider(window.ethereum);
+            const signer = await provider.getSigner();
+            const contract = new ethers.Contract(ADDR, ABI, signer);
+            
             log("Check your wallet...", false);
-            const tx = await con.buyTokens({ value: ethers.parseEther(v) });
+            const tx = await contract.buyTokens({ value: ethers.parseEther(v) });
+            log("Transaction Sent! Waiting...", false);
             await tx.wait();
-            log("Success!", false);
-        } catch (e) { log(e.reason || "Transaction failed", true); }
+            log("Purchase Successful!", false);
+        } catch (e) {
+            log(e.reason || "Transaction failed", true);
+        }
     };
 </script>
 </body>
