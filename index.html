@@ -3,123 +3,129 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AYB Token Presale | Secure Terminal</title>
+    <title>AYB Presale | Phase 2</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/6.7.0/ethers.umd.min.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Inter:wght@300;500;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Inter:wght@400;700&display=swap" rel="stylesheet">
     <style>
-        :root { --primary: #00ffa3; --bg: #0d1117; --card: rgba(22, 27, 34, 0.95); }
+        :root { --primary: #00ffa3; --bg: #0a0c10; --card: #161b22; }
         body { background: var(--bg); color: white; font-family: 'Inter', sans-serif; margin: 0; display: flex; justify-content: center; align-items: center; min-height: 100vh; }
-        .container { background: var(--card); border: 1px solid #30363d; padding: 2.5rem; border-radius: 20px; width: 100%; max-width: 400px; text-align: center; box-shadow: 0 20px 50px rgba(0,0,0,0.5); }
-        h1 { font-family: 'Orbitron', sans-serif; color: var(--primary); font-size: 1.6rem; margin-bottom: 0.5rem; }
-        .subtitle { color: #8b949e; font-size: 0.85rem; margin-bottom: 2rem; }
-        
-        .input-group { background: rgba(0,0,0,0.3); padding: 1rem; border-radius: 12px; border: 1px solid #30363d; margin-bottom: 1.5rem; text-align: left; }
-        label { font-size: 0.7rem; color: #8b949e; text-transform: uppercase; letter-spacing: 1px; }
-        input { background: transparent; border: none; color: white; font-size: 1.4rem; width: 100%; outline: none; margin-top: 5px; font-weight: bold; }
-        
-        .stats { display: flex; justify-content: space-between; margin-bottom: 1.5rem; font-size: 0.85rem; color: #c9d1d9; }
-        
-        .btn { background: var(--primary); color: #000; border: none; padding: 16px; border-radius: 10px; width: 100%; font-weight: 800; cursor: pointer; transition: 0.3s; font-size: 1rem; }
-        .btn:hover { transform: translateY(-2px); box-shadow: 0 10px 20px rgba(0,255,163,0.2); }
-        
-        #status { margin-top: 1rem; font-size: 0.8rem; padding: 10px; border-radius: 8px; display: none; line-height: 1.4; }
-        .error { background: rgba(255, 77, 77, 0.1); color: #ff7b72; border: 1px solid rgba(255, 77, 72, 0.2); }
-        .success { background: rgba(0, 255, 163, 0.1); color: var(--primary); border: 1px solid rgba(0, 255, 163, 0.2); }
+        .container { background: var(--card); border: 1px solid #30363d; padding: 2rem; border-radius: 15px; width: 100%; max-width: 400px; text-align: center; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
+        h1 { font-family: 'Orbitron', sans-serif; color: var(--primary); font-size: 1.4rem; margin-bottom: 5px; }
+        .timer { display: flex; justify-content: center; gap: 10px; margin: 15px 0; padding: 10px; background: rgba(0,255,163,0.05); border-radius: 10px; border: 1px dashed var(--primary); }
+        .timer-unit { font-size: 0.8rem; color: #8b949e; }
+        .timer-val { display: block; font-size: 1.2rem; font-weight: bold; color: var(--primary); font-family: 'Orbitron'; }
+        .input-group { background: #0d1117; border: 1px solid #30363d; padding: 12px; border-radius: 10px; margin: 20px 0; text-align: left; }
+        label { font-size: 0.7rem; color: #8b949e; text-transform: uppercase; }
+        input { background: transparent; border: none; color: white; font-size: 1.3rem; width: 100%; outline: none; margin-top: 5px; font-weight: bold; }
+        .btn { background: var(--primary); color: black; border: none; padding: 15px; border-radius: 10px; width: 100%; font-weight: bold; cursor: pointer; font-size: 1rem; transition: 0.2s; }
+        .btn:hover { opacity: 0.9; transform: translateY(-2px); }
+        #status { margin-top: 15px; font-size: 0.8rem; display: none; padding: 10px; border-radius: 5px; }
+        .err { border: 1px solid #f85149; color: #f85149; }
+        .ok { border: 1px solid var(--primary); color: var(--primary); }
     </style>
 </head>
 <body>
 
 <div class="container">
     <h1>AYB TERMINAL</h1>
-    <div class="subtitle">Official Whitelisted Presale</div>
+    <p style="color:#8b949e; font-size:0.8rem">Phase 2 Ends In:</p>
+    
+    <div class="timer">
+        <div><span class="timer-val" id="days">00</span><span class="timer-unit">Days</span></div>
+        <div><span class="timer-val" id="hours">00</span><span class="timer-unit">Hours</span></div>
+        <div><span class="timer-val" id="mins">00</span><span class="timer-unit">Mins</span></div>
+        <div><span class="timer-val" id="secs">00</span><span class="timer-unit">Secs</span></div>
+    </div>
 
-    <div id="connectArea">
+    <div id="connectSection">
         <button id="connectBtn" class="btn">CONNECT WALLET</button>
     </div>
 
-    <div id="buyArea" style="display: none;">
+    <div id="buySection" style="display:none">
         <div class="input-group">
-            <label>Amount to Spend (ETH)</label>
-            <input type="number" id="ethInput" placeholder="0.00" step="0.01" min="0.01">
+            <label>Investment (ETH)</label>
+            <input type="number" id="ethAmount" placeholder="0.00" step="0.01">
         </div>
-        
-        <div class="stats">
-            <span>Price: 0.01 ETH</span>
-            <span id="tokenCalc">You get: 0 AYB</span>
-        </div>
-
-        <button id="buyBtn" class="btn">PURCHASE NOW</button>
+        <p id="calc" style="font-size:0.8rem; color:#8b949e; margin-bottom:15px">You get: 0 AYB</p>
+        <button id="buyBtn" class="btn">BUY TOKENS</button>
     </div>
 
     <div id="status"></div>
 </div>
 
 <script>
-    const CONTRACT_ADDRESS = "0xE6bBb6A5904045C4807C9139Ad2E7C5EcFCB0F94";
+    // --- SETTINGS ---
+    const CONTRACT = "0xE6bBb6A5904045C4807C9139Ad2E7C5EcFCB0F94";
     const ABI = ["function buyTokens() external payable"];
-    const TARGET_CHAIN = "0xa4b1"; // Arbitrum One
+    const CHAIN_ID = "0xa4b1"; // Arbitrum
+    const END_DATE = new Date("March 30, 2026 23:59:59").getTime();
 
-    const connectBtn = document.getElementById('connectBtn');
-    const buyBtn = document.getElementById('buyBtn');
-    const ethInput = document.getElementById('ethInput');
-    const statusDiv = document.getElementById('status');
+    // --- TIMER LOGIC ---
+    setInterval(() => {
+        const now = new Date().getTime();
+        const diff = END_DATE - now;
+        if (diff > 0) {
+            document.getElementById('days').innerText = Math.floor(diff / (1000 * 60 * 60 * 24));
+            document.getElementById('hours').innerText = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+            document.getElementById('mins').innerText = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+            document.getElementById('secs').innerText = Math.floor((diff % (1000 * 60)) / 1000);
+        }
+    }, 1000);
 
-    function notify(msg, isError) {
-        statusDiv.innerText = msg;
-        statusDiv.className = isError ? 'error' : 'success';
-        statusDiv.style.display = 'block';
+    // --- WALLET LOGIC ---
+    const btn = document.getElementById('connectBtn');
+    const status = document.getElementById('status');
+
+    function showMsg(m, isErr) {
+        status.innerText = m;
+        status.className = isErr ? 'err' : 'ok';
+        status.style.display = 'block';
     }
 
-    ethInput.oninput = () => {
-        const val = ethInput.value || 0;
-        document.getElementById('tokenCalc').innerText = You get: ${val * 100} AYB;
+    document.getElementById('ethAmount').oninput = (e) => {
+        document.getElementById('calc').innerText = You get: ${e.target.value * 100} AYB;
     };
 
-    connectBtn.onclick = async () => {
-        if (!window.ethereum) {
-            // Auto-redirect for mobile users
-            window.location.href = "https://metamask.app.link/dapp/" + window.location.href.split('://')[1];
-            return;
-        }
-        
-        try {
-            // Trigger popup explicitly
-            await window.ethereum.request({ method: 'wallet_requestPermissions', params: [{ eth_accounts: {} }] });
-            const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
-            
-            const chainId = await window.ethereum.request({ method: 'eth_chainId' });
-            if (chainId !== TARGET_CHAIN) {
-                await window.ethereum.request({
-                    method: 'wallet_switchEthereumChain',
-                    params: [{ chainId: TARGET_CHAIN }],
-                });
+    btn.onclick = async () => {
+        if (window.ethereum) {
+            try {
+                // FORCE REFRESH CONNECTION
+                await window.ethereum.request({ method: 'eth_requestAccounts' });
+                const chain = await window.ethereum.request({ method: 'eth_chainId' });
+                
+                if (chain !== CHAIN_ID) {
+                    await window.ethereum.request({
+                        method: 'wallet_switchEthereumChain',
+                        params: [{ chainId: CHAIN_ID }]
+                    });
+                }
+                document.getElementById('connectSection').style.display = 'none';
+                document.getElementById('buySection').style.display = 'block';
+                showMsg("Connected!", false);
+            } catch (e) {
+                showMsg(e.message, true);
             }
-
-            document.getElementById('connectArea').style.display = 'none';
-            document.getElementById('buyArea').style.display = 'block';
-            notify("Wallet Connected: " + accounts[0].substring(0,6) + "...", false);
-        } catch (err) {
-            notify(err.message, true);
+        } else {
+            // MOBILE REDIRECT
+            window.location.href = "https://metamask.app.link/dapp/yaznvip.github.io/ayb-presale/";
         }
     };
 
-    buyBtn.onclick = async () => {
+    document.getElementById('buyBtn').onclick = async () => {
         try {
-            const amount = ethInput.value;
-            if (amount <= 0) return notify("Please enter a valid amount", true);
-
+            const val = document.getElementById('ethAmount').value;
+            if (!val || val <= 0) return showMsg("Enter valid amount", true);
+            
             const provider = new ethers.BrowserProvider(window.ethereum);
             const signer = await provider.getSigner();
-            const contract = new ethers.Contract(CONTRACT_ADDRESS, ABI, signer);
-
-            notify("Please confirm transaction in wallet...", false);
-            const tx = await contract.buyTokens({ value: ethers.parseEther(amount) });
+            const contract = new ethers.Contract(CONTRACT, ABI, signer);
             
-            notify("Processing transaction...", false);
+            showMsg("Confirm in wallet...", false);
+            const tx = await contract.buyTokens({ value: ethers.parseEther(val) });
             await tx.wait();
-            notify("Purchase Successful!", false);
-        } catch (err) {
-            notify("Failed: " + (err.reason || err.message), true);
+            showMsg("Success!", false);
+        } catch (e) {
+            showMsg(e.reason || e.message, true);
         }
     };
 </script>
