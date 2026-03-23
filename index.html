@@ -3,34 +3,46 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AYB TERMINAL | Phase 2 Node</title>
+    <title>AYB TERMINAL | Technical Demo</title>
     
     <script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/6.7.0/ethers.umd.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Inter:wght@400;600&display=swap" rel="stylesheet">
     
     <style>
         :root { --primary: #00ffa3; --bg: #0a0c10; --card: #161b22; }
-        body { background: var(--bg); color: white; font-family: 'Inter', sans-serif; margin: 0; display: flex; justify-content: center; align-items: center; min-height: 100vh; text-align: center; }
-        .card { background: var(--card); border: 1px solid #30363d; padding: 2.5rem; border-radius: 24px; width: 90%; max-width: 400px; box-shadow: 0 25px 50px rgba(0,0,0,0.6); position: relative; border-top: 4px solid var(--primary); }
-        h1 { font-family: 'Orbitron', sans-serif; color: var(--primary); font-size: 1.5rem; margin-bottom: 5px; letter-spacing: 2px; }
-        .subtitle { color: #8b949e; font-size: 0.75rem; margin-bottom: 20px; text-transform: uppercase; }
-        .timer-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin: 25px 0; padding: 15px; background: rgba(0,255,163,0.03); border-radius: 15px; border: 1px solid #30363d; }
-        .t-num { display: block; font-size: 1.3rem; font-weight: bold; color: var(--primary); font-family: 'Orbitron'; }
-        .t-lab { font-size: 0.6rem; color: #8b949e; text-transform: uppercase; font-weight: 600; }
-        .btn { background: var(--primary); color: #000; border: none; padding: 18px; border-radius: 12px; width: 100%; font-weight: 800; cursor: pointer; transition: 0.3s ease; font-size: 1rem; text-transform: uppercase; letter-spacing: 1px; }
-        .btn:hover { box-shadow: 0 0 25px rgba(0,255,163,0.5); transform: translateY(-3px); }
-        .buy-interface { background: #010409; border: 1px solid #30363d; padding: 20px; border-radius: 16px; margin: 20px 0; text-align: left; display: none; animation: slideIn 0.4s ease-out; }
-        input { background: transparent; border: none; color: white; font-size: 1.5rem; width: 100%; outline: none; font-weight: bold; margin-top: 5px; }
-        #status-display { margin-top: 15px; font-size: 0.8rem; display: none; padding: 10px; border-radius: 8px; border: 1px solid; }
-        @keyframes slideIn { from { opacity: 0; transform: translateY(15px); } to { opacity: 1; transform: translateY(0); } }
+        body { background: var(--bg); color: white; font-family: 'Inter', sans-serif; margin: 0; display: flex; justify-content: center; align-items: center; min-height: 100vh; overflow-x: hidden; }
+        
+        .side-notice { position: fixed; left: 20px; bottom: 20px; width: 260px; background: rgba(255,165,0,0.1); border-left: 4px solid orange; padding: 15px; font-size: 0.7rem; color: #ccc; text-align: left; line-height: 1.4; z-index: 100; border-radius: 0 8px 8px 0; pointer-events: none; }
+
+        .card { background: var(--card); border: 1px solid #30363d; padding: 2.2rem; border-radius: 28px; width: 90%; max-width: 420px; box-shadow: 0 25px 50px rgba(0,0,0,0.6); border-top: 4px solid var(--primary); position: relative; }
+        h1 { font-family: 'Orbitron', sans-serif; color: var(--primary); font-size: 1.5rem; margin-bottom: 8px; letter-spacing: 2px; }
+        
+        .progress-container { margin: 25px 0; text-align: left; }
+        .progress-labels { display: flex; justify-content: space-between; font-size: 0.65rem; color: #8b949e; margin-bottom: 8px; text-transform: uppercase; font-weight: bold; }
+        .bar-bg { background: #30363d; height: 12px; border-radius: 6px; overflow: hidden; border: 1px solid #3e444d; }
+        .bar-fill { background: linear-gradient(90deg, #00ffa3, #00d187); height: 100%; width: 0%; transition: width 1.5s ease-in-out; box-shadow: 0 0 15px rgba(0,255,163,0.3); }
+
+        .timer-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-bottom: 25px; padding: 12px; background: rgba(0,255,163,0.03); border-radius: 15px; border: 1px solid #30363d; }
+        .t-num { display: block; font-size: 1.2rem; font-weight: bold; color: var(--primary); font-family: 'Orbitron'; }
+        .t-lab { font-size: 0.55rem; color: #8b949e; text-transform: uppercase; }
+
+        .btn { background: var(--primary); color: #000; border: none; padding: 18px; border-radius: 14px; width: 100%; font-weight: 800; cursor: pointer; transition: 0.3s; font-size: 0.95rem; text-transform: uppercase; letter-spacing: 1px; }
+        .btn:hover { box-shadow: 0 0 30px rgba(0,255,163,0.5); transform: translateY(-2px); }
+        
+        .buy-interface { background: #010409; border: 1px solid #30363d; padding: 22px; border-radius: 18px; margin: 20px 0; text-align: left; display: none; border-left: 4px solid var(--primary); }
+        input { background: transparent; border: none; color: white; font-size: 1.6rem; width: 100%; outline: none; font-weight: bold; margin-top: 5px; }
+        #status-display { margin-top: 15px; font-size: 0.75rem; display: none; padding: 12px; border-radius: 10px; border: 1px solid; background: rgba(0,0,0,0.4); }
     </style>
 </head>
 <body>
 
+<div class="side-notice">
+    <strong>TECHNICAL DEMONSTRATION:</strong><br>
+    This interface is a functional prototype for educational and technical display. Direct participation is strictly restricted to whitelisted entities. Unauthorized attempts will be rejected by the Smart Contract.
+</div>
+
 <div class="card">
     <h1>AYB TERMINAL</h1>
-    <p class="subtitle">Decentralized Node Access</p>
-    
     <div class="timer-grid">
         <div><span class="t-num" id="d_box">00</span><span class="t-lab">Days</span></div>
         <div><span class="t-num" id="h_box">00</span><span class="t-lab">Hrs</span></div>
@@ -38,116 +50,120 @@
         <div><span class="t-num" id="s_box">00</span><span class="t-lab">Sec</span></div>
     </div>
 
-    <div id="auth-area">
-        <button id="connect-btn" class="btn">Connect Wallet</button>
+    <div class="progress-container">
+        <div class="progress-labels">
+            <span>Sold: <span id="sold-count">0</span> AYB</span>
+            <span>Supply: 500K</span>
+        </div>
+        <div class="bar-bg"><div id="progress-bar" class="bar-fill"></div></div>
     </div>
+
+    <div id="auth-area"><button id="connect-btn" class="btn">Connect Terminal</button></div>
 
     <div id="buy-area" class="buy-interface">
-        <label style="font-size:0.7rem; color:#8b949e; font-weight:600;">PAYMENT (ETH)</label>
-        <input type="number" id="eth-input" placeholder="0.00" step="0.0001">
-        <p id="ayb-output" style="font-size:0.85rem; color:var(--primary); margin: 15px 0 10px 0; font-weight:bold;">YOU GET: 0 AYB</p>
-        <button id="confirm-buy" class="btn">Purchase Now</button>
+        <label style="font-size:0.65rem; color:#8b949e; letter-spacing:1px; font-weight:bold;">PAYMENT (ETH)</label>
+        <input type="number" id="eth-input" placeholder="0.0" step="0.0001">
+        <p id="ayb-output" style="font-size:0.85rem; color:var(--primary); margin: 15px 0 10px 0; font-weight:bold;">ESTIMATED: 0 AYB</p>
+        <button id="confirm-buy" class="btn">Execute Swap</button>
     </div>
-
     <div id="status-display"></div>
 </div>
 
 <script>
-    // --- TIMER CONFIG ---
-    const TARGET = new Date("April 21, 2026 23:59:59").getTime();
-    function updateTimer() {
-        const now = new Date().getTime();
-        const gap = TARGET - now;
+    const TARGET_DATE = new Date("April 21, 2026 23:59:59").getTime();
+    const SALE_CONTRACT = "0xE6bBb6A5904045C4807C9139Ad2E7C5EcFCB0F94";
+    const TOKEN_CONTRACT = "0x4b8D134A91405F8Dd3bc679F5B2b0B9283Cb7e15";
+    const TOTAL_SUPPLY = 500000;
+    const RPC_URL = "https://arb1.arbitrum.io/rpc"; 
+
+    const ABI = [
+        "function buyTokens() external payable",
+        "function balanceOf(address) view returns (uint256)"
+    ];
+
+    let signer;
+    let ethPrice = 2500;
+
+    // Timer Implementation
+    setInterval(() => {
+        const gap = TARGET_DATE - new Date().getTime();
         if (gap > 0) {
             document.getElementById("d_box").innerText = Math.floor(gap / 86400000);
             document.getElementById("h_box").innerText = String(Math.floor((gap % 86400000) / 3600000)).padStart(2, "0");
             document.getElementById("m_box").innerText = String(Math.floor((gap % 3600000) / 60000)).padStart(2, "0");
             document.getElementById("s_box").innerText = String(Math.floor((gap % 60000) / 1000)).padStart(2, "0");
         }
+    }, 1000);
+
+    // Fetch Sold Tokens from Contract
+    async function syncStats() {
+        try {
+            const provider = new ethers.JsonRpcProvider(RPC_URL);
+            const token = new ethers.Contract(TOKEN_CONTRACT, ["function balanceOf(address) view returns (uint256)"], provider);
+            
+            // Checking remaining tokens in Sale Contract
+            const balanceWei = await token.balanceOf(SALE_CONTRACT);
+            const remaining = Number(ethers.formatEther(balanceWei));
+            
+            const sold = Math.max(0, TOTAL_SUPPLY - remaining);
+            const percentage = (sold / TOTAL_SUPPLY) * 100;
+
+            document.getElementById("sold-count").innerText = sold.toLocaleString();
+            document.getElementById("progress-bar").style.width = percentage + "%";
+        } catch (e) { console.error("Chain sync error"); }
     }
-    setInterval(updateTimer, 1000);
+    syncStats();
 
-    // --- WEB3 SETTINGS ---
-    const ADDR = "0xE6bBb6A5904045C4807C9139Ad2E7C5EcFCB0F94";
-    const ABI = ["function buyTokens() external payable"];
-    const CHAIN = "0xa4b1"; 
-
-    const cBtn = document.getElementById("connect-btn");
-    const sBox = document.getElementById("status-display");
-    let signer;
-    let ethPrice = 2500; // Fallback price
-
-    function notify(msg, err) {
-        sBox.innerText = msg;
-        sBox.style.display = "block";
-        sBox.style.color = err ? "#ff7b72" : "#00ffa3";
-        sBox.style.borderColor = err ? "#ff7b72" : "#00ffa3";
-    }
-
-    // --- DYNAMIC PRICE LOGIC ---
-    async function updateEthPrice() {
+    // Live Price Engine
+    async function updatePrice() {
         try {
             const r = await fetch('https://api.binance.com/api/v3/ticker/price?symbol=ETHUSDT');
             const d = await r.json();
             ethPrice = parseFloat(d.price);
-        } catch (e) { console.log("Using fallback price"); }
+        } catch(e) {}
     }
-    updateEthPrice();
+    updatePrice();
 
     document.getElementById("eth-input").oninput = (e) => {
         const val = e.target.value || 0;
-        // Formula: (ETH * Market Price) / Token Price (0.1$)
         const tokens = (val * ethPrice) / 0.1;
-        document.getElementById("ayb-output").innerText = `YOU GET: ${Math.floor(tokens).toLocaleString()} AYB`;
+        document.getElementById("ayb-output").innerText = `ESTIMATED: ${Math.floor(tokens).toLocaleString()} AYB`;
     };
 
-    // --- CONNECTION LOGIC ---
-    async function start() {
-        if (!window.ethereum) {
-            if (/Android|iPhone/i.test(navigator.userAgent)) {
-                window.location.href = "https://metamask.app.link/dapp/yaznvip.github.io/ayb-presale/";
-            } else {
-                notify("MetaMask Extension not found!", true);
-            }
-            return;
-        }
-
+    // Connection Handler
+    async function connect() {
+        if (!window.ethereum) return alert("MetaMask not found!");
         try {
-            notify("Waiting for MetaMask...", false);
-            // Force account selection/unlock
             const accounts = await window.ethereum.request({ method: "eth_requestAccounts" });
-            
-            if (accounts.length === 0) throw new Error("No accounts selected");
-
-            const chainId = await window.ethereum.request({ method: "eth_chainId" });
-            if (chainId !== CHAIN) {
-                await window.ethereum.request({ method: "wallet_switchEthereumChain", params: [{ chainId: CHAIN }] });
-            }
-
             const provider = new ethers.BrowserProvider(window.ethereum);
             signer = await provider.getSigner();
-            
+
+            const chainId = await window.ethereum.request({ method: "eth_chainId" });
+            if (chainId !== "0xa4b1") {
+                await window.ethereum.request({ method: "wallet_switchEthereumChain", params: [{ chainId: "0xa4b1" }] });
+            }
+
             document.getElementById("auth-area").style.display = "none";
             document.getElementById("buy-area").style.display = "block";
-            notify("Terminal Online", false);
-        } catch (e) { 
-            console.error(e);
-            notify("Action Required: Please check MetaMask window", true); 
-        }
+            const s = document.getElementById("status-display");
+            s.style.display = "block";
+            s.style.color = "#00ffa3";
+            s.innerText = "Connection Secure | Ready for Whitelist Check";
+        } catch (e) { alert("Connection Error: Check MetaMask status"); }
     }
 
-    cBtn.onclick = start;
+    document.getElementById("connect-btn").onclick = connect;
 
     document.getElementById("confirm-buy").onclick = async () => {
         try {
-            const v = document.getElementById("eth-input").value;
-            if(!v || v <= 0) return notify("Enter valid ETH amount", true);
-            notify("Confirming Transaction...", false);
-            const contract = new ethers.Contract(ADDR, ABI, signer);
-            const tx = await contract.buyTokens({ value: ethers.parseEther(v) });
+            const ethVal = document.getElementById("eth-input").value;
+            if(!ethVal || ethVal <= 0) return alert("Enter valid ETH amount");
+            
+            const contract = new ethers.Contract(SALE_CONTRACT, ABI, signer);
+            const tx = await contract.buyTokens({ value: ethers.parseEther(ethVal) });
             await tx.wait();
-            notify("Purchase Successful!", false);
-        } catch (e) { notify("Transaction Failed", true); }
+            alert("Swap Executed Successfully!");
+        } catch (e) { alert("Execution Failed: Verify Whitelist Status"); }
     };
 </script>
 </body>
