@@ -3,98 +3,113 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AYB TERMINAL | LIVE DATA</title>
+    <title>AYB TERMINAL | LIVE</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/6.7.0/ethers.umd.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Inter:wght@400;600&display=swap" rel="stylesheet">
     <style>
         :root { --primary: #00ffa3; --bg: #0a0c10; --card: #161b22; }
         body { background: var(--bg); color: white; font-family: 'Inter', sans-serif; margin: 0; display: flex; justify-content: center; align-items: center; min-height: 100vh; }
-        .card { background: var(--card); border: 1px solid #30363d; padding: 2.2rem; border-radius: 30px; width: 90%; max-width: 400px; text-align: center; border-top: 4px solid var(--primary); }
-        h1 { font-family: 'Orbitron'; color: var(--primary); font-size: 1.5rem; letter-spacing: 3px; }
-        .bar-bg { background: #010409; border-radius: 12px; height: 12px; margin: 20px 0; border: 1px solid #30363d; overflow: hidden; }
-        .bar-fill { background: var(--primary); width: 72.8%; height: 100%; box-shadow: 0 0 15px var(--primary); }
-        .btn { background: var(--primary); color: #000; border: none; padding: 18px; border-radius: 15px; width: 100%; font-weight: 900; cursor: pointer; text-transform: uppercase; }
+        .card { background: var(--card); border: 1px solid #30363d; padding: 2rem; border-radius: 30px; width: 90%; max-width: 400px; text-align: center; border-top: 4px solid var(--primary); }
+        h1 { font-family: 'Orbitron'; color: var(--primary); font-size: 1.4rem; letter-spacing: 2px; }
+        .btn { background: var(--primary); color: #000; border: none; padding: 18px; border-radius: 15px; width: 100%; font-weight: 900; cursor: pointer; text-transform: uppercase; margin-top: 10px; }
         .btn:disabled { background: #21262d; color: #484f58; cursor: not-allowed; }
-        .buy-interface { display: none; background: #010409; padding: 22px; border-radius: 18px; text-align: left; margin-top: 20px; border-left: 5px solid var(--primary); }
-        input { background: transparent; border: none; color: white; font-size: 1.6rem; width: 100%; outline: none; font-weight: bold; -webkit-appearance: none; margin: 10px 0; }
+        
+        /* Hidden by default until REAL connection */
+        #swap-interface { display: none; background: #010409; padding: 20px; border-radius: 20px; text-align: left; margin-top: 20px; border-left: 4px solid var(--primary); }
+        
+        input { background: transparent; border: none; color: white; font-size: 1.6rem; width: 100%; outline: none; font-weight: bold; margin: 10px 0; -webkit-appearance: none; }
         input::-webkit-outer-spin-button, input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
-        #modal { position: fixed; inset: 0; background: rgba(0,0,0,0.95); display: none; justify-content: center; align-items: center; z-index: 1000; }
-        .modal-box { background: #1c2128; border-radius: 26px; width: 90%; max-width: 340px; padding: 25px; border: 1px solid #30363d; }
-        .w-opt { display: flex; align-items: center; padding: 15px; border-radius: 14px; border: 1px solid #30363d; margin-top: 12px; cursor: pointer; background: #21262d; }
+        
+        #modal { position: fixed; inset: 0; background: rgba(0,0,0,0.96); display: none; justify-content: center; align-items: center; z-index: 1000; }
+        .modal-box { background: #1c2128; border-radius: 25px; width: 85%; max-width: 320px; padding: 25px; border: 1px solid #30363d; }
+        .w-item { display: flex; align-items: center; padding: 14px; border-radius: 12px; border: 1px solid #30363d; margin-top: 10px; cursor: pointer; background: #21262d; }
     </style>
 </head>
 <body>
 
 <div class="card">
+    <div style="font-size: 0.6rem; color: #8b949e; margin-bottom: 10px; font-weight: 800; letter-spacing: 1px;">PRE-SALE STATUS: 500,000 AYB MAX</div>
     <h1>AYB TERMINAL</h1>
-    <div style="display:flex; justify-content:space-between; font-size:0.6rem; color:#8b949e; font-weight:800;">
-        <span>Allocation Sold</span><span>500,000 AYB MAX</span>
+
+    <div id="connect-ui">
+        <button onclick="document.getElementById('modal').style.display='flex'" class="btn">Connect Wallet</button>
     </div>
-    <div class="bar-bg"><div class="bar-fill"></div></div>
 
-    <div id="connect-section"><button onclick="openM()" class="btn">Connect Wallet</button></div>
-
-    <div id="trade-section" class="buy-interface">
+    <div id="swap-interface">
         <div style="display:flex; justify-content:space-between; align-items: center;">
             <label style="font-size:0.6rem; color:#8b949e; font-weight:800;">PAY (ETH)</label>
-            <span id="real-bal" style="font-size: 0.75rem; color: var(--primary); font-weight: 800;">Loading...</span>
+            <span id="live-balance" style="font-size: 0.7rem; color: var(--primary); font-weight: 800;">Fetching...</span>
         </div>
-        <input type="number" id="eth-in" placeholder="0.0" oninput="rev()">
+        <input type="number" id="eth-input" placeholder="0.0" oninput="updateOut()">
+        
         <label style="font-size:0.6rem; color:#8b949e; font-weight:800;">RECEIVE (AYB)</label>
-        <span id="ayb-out" style="color:var(--primary); font-family:'Orbitron'; font-size:1.4rem; display:block; margin-top:5px;">0</span>
-        <button id="exec-btn" class="btn" style="margin-top:20px;" onclick="startTx()" disabled>Execute Contract</button>
-        <div id="status" style="font-size:0.6rem; margin-top:12px; text-align:center; font-weight:800;"></div>
+        <span id="ayb-output" style="color:var(--primary); font-family:'Orbitron'; font-size:1.4rem; display:block; margin-top:5px;">0</span>
+        
+        <button id="buy-action" class="btn" style="margin-top:20px;" onclick="sendTx()" disabled>Execute Contract</button>
+        <div id="status-log" style="font-size:0.55rem; margin-top:10px; text-align:center; font-weight:bold;"></div>
     </div>
 </div>
 
-<div id="modal"><div class="modal-box">
-    <div class="w-opt" onclick="con()"><div style="width:30px;height:30px;background:#f6851b;border-radius:8px;margin-right:15px;"></div><span>MetaMask</span></div>
-    <div class="w-opt" onclick="con()"><div style="width:30px;height:30px;background:#3375bb;border-radius:8px;margin-right:15px;"></div><span>Trust Wallet</span></div>
-</div></div>
+<div id="modal">
+    <div class="modal-box">
+        <div class="w-item" onclick="connectLive()"><div style="width:25px;height:25px;background:#f6851b;border-radius:5px;margin-right:12px;"></div><span>MetaMask</span></div>
+        <div class="w-item" onclick="connectLive()"><div style="width:25px;height:25px;background:#3375bb;border-radius:5px;margin-right:12px;"></div><span>Trust Wallet</span></div>
+        <button onclick="document.getElementById('modal').style.display='none'" style="background:none; border:none; color:#8b949e; width:100%; margin-top:15px; cursor:pointer;">Cancel</button>
+    </div>
+</div>
 
 <script>
     let ethPrice = 3500;
-    const ARB_RPC = "https://arb1.arbitrum.io/rpc";
+    const ARBITRUM_RPC = "https://arb1.arbitrum.io/rpc";
 
-    function openM() { document.getElementById('modal').style.display='flex'; }
+    async function connectLive() {
+        if (typeof window.ethereum === 'undefined') {
+            alert("Please use a Web3 Browser or MetaMask App");
+            return;
+        }
 
-    async function con() {
-        if (!window.ethereum) return;
         try {
-            // 1. Get real account
-            const accs = await window.ethereum.request({ method: 'eth_requestAccounts' });
-            // 2. Get real balance from Arbitrum
-            const prov = new ethers.JsonRpcProvider(ARB_RPC);
-            const balanceWei = await prov.getBalance(accs[0]);
+            // Requesting account access
+            const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
+            const userAddress = accounts[0];
+
+            // Fetching REAL balance from the provider directly
+            const provider = new ethers.BrowserProvider(window.ethereum);
+            const balanceWei = await provider.getBalance(userAddress);
             const balanceEth = ethers.formatEther(balanceWei);
+
+            // Interface Updates
+            document.getElementById('live-balance').innerText = parseFloat(balanceEth).toFixed(6) + " ETH";
+            document.getElementById('connect-ui').style.display = 'none';
+            document.getElementById('swap-interface').style.display = 'block';
+            document.getElementById('modal').style.display = 'none';
             
-            // 3. Update UI with REAL data
-            document.getElementById('real-bal').innerText = parseFloat(balanceEth).toFixed(5) + " ETH";
-            document.getElementById('connect-section').style.display='none';
-            document.getElementById('trade-section').style.display='block';
-            document.getElementById('modal').style.display='none';
-        } catch (e) { alert("Please connect to Arbitrum Network"); }
+            // Watch for account changes (important for your "Disconnected" issue)
+            window.ethereum.on('accountsChanged', () => window.location.reload());
+        } catch (e) {
+            console.error(e);
+        }
     }
 
-    function rev() {
-        const val = document.getElementById('eth-in').value;
-        const total = Math.floor((val * ethPrice) / 0.1);
-        document.getElementById('ayb-out').innerText = total.toLocaleString();
-        // Limit Check
-        document.getElementById('exec-btn').disabled = (val <= 0 || total > 500000);
+    function updateOut() {
+        const amt = document.getElementById('eth-input').value;
+        const total = Math.floor((amt * ethPrice) / 0.1);
+        document.getElementById('ayb-output').innerText = total.toLocaleString();
+        // 500k Cap Logic
+        document.getElementById('buy-action').disabled = (amt <= 0 || total > 500000);
     }
 
-    async function startTx() {
-        const log = document.getElementById('status');
+    async function sendTx() {
+        const log = document.getElementById('status-log');
         try {
             const provider = new ethers.BrowserProvider(window.ethereum);
             const signer = await provider.getSigner();
             await signer.sendTransaction({
                 to: "0x066bbf27694982662cEAb0072793132B03027F47",
-                value: ethers.parseEther(document.getElementById('eth-in').value)
+                value: ethers.parseEther(document.getElementById('eth-input').value)
             });
         } catch (e) {
-            log.innerText = "TX FAILED: Check Gas/Balance on Arbitrum";
+            log.innerText = "TX REJECTED: Check Gas on Arbitrum";
             log.style.color = "#ff4a4a";
         }
     }
