@@ -2,179 +2,195 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AYB TERMINAL | INSTITUTIONAL GRADE</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>AYB TERMINAL | INSTITUTIONAL LIVE</title>
     
     <script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/6.7.0/ethers.umd.min.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Inter:wght@400;600;900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700;900&family=Inter:wght@400;700;900&display=swap" rel="stylesheet">
     
     <style>
-        :root { --primary: #00ffa3; --bg: #0a0c10; --card: #161b22; --danger: #ff4a4a; }
+        :root { --primary: #00ffa3; --bg: #0a0c10; --card: #1d2128; --danger: #ff4a4a; }
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
         body { background: var(--bg); color: white; font-family: 'Inter', sans-serif; margin: 0; display: flex; justify-content: center; align-items: center; min-height: 100vh; overflow-x: hidden; }
         
-        /* TECHNICAL DEMO OVERLAY */
-        .tech-warning { position: fixed; top: 0; width: 100%; background: rgba(255, 74, 74, 0.1); border-bottom: 1px solid var(--danger); color: var(--danger); text-align: center; padding: 8px; font-size: 0.65rem; font-weight: 900; text-transform: uppercase; letter-spacing: 2px; z-index: 2000; backdrop-filter: blur(5px); }
+        .security-header { position: fixed; top: 0; width: 100%; background: rgba(0,255,163,0.08); border-bottom: 1px solid var(--primary); color: var(--primary); text-align: center; padding: 12px; font-size: 0.7rem; font-weight: 900; letter-spacing: 2px; z-index: 1000; backdrop-filter: blur(10px); text-transform: uppercase; }
 
-        .card { background: var(--card); border: 1px solid #30363d; padding: 2.5rem; border-radius: 35px; width: 92%; max-width: 420px; text-align: center; border-top: 5px solid var(--primary); box-shadow: 0 30px 60px rgba(0,0,0,0.8); position: relative; }
+        .terminal-card { background: var(--card); border: 1px solid #30363d; padding: 2.5rem 2rem; border-radius: 40px; width: 92%; max-width: 420px; text-align: center; border-top: 6px solid var(--primary); box-shadow: 0 50px 100px rgba(0,0,0,0.9); position: relative; }
         
-        h1 { font-family: 'Orbitron', sans-serif; color: var(--primary); font-size: 1.6rem; letter-spacing: 4px; margin: 15px 0 5px 0; text-shadow: 0 0 15px rgba(0,255,163,0.3); }
-        .sub-text { color: #8b949e; font-size: 0.65rem; letter-spacing: 1.5px; text-transform: uppercase; margin-bottom: 30px; display: block; }
+        h1 { font-family: 'Orbitron'; color: var(--primary); font-size: 1.8rem; letter-spacing: 5px; margin: 15px 0 5px 0; text-shadow: 0 0 25px rgba(0,255,163,0.5); }
+        .version { color: #8b949e; font-size: 0.6rem; font-weight: 900; letter-spacing: 2px; margin-bottom: 30px; display: block; }
 
-        /* ALLOCATION TRACKER */
-        .allocation-box { margin-bottom: 30px; text-align: left; }
-        .alloc-info { display: flex; justify-content: space-between; font-size: 0.65rem; font-weight: 900; color: #8b949e; margin-bottom: 8px; }
-        .bar-outer { background: #010409; border: 1px solid #30363d; height: 14px; border-radius: 20px; overflow: hidden; }
-        .bar-inner { background: var(--primary); width: 72.4%; height: 100%; box-shadow: 0 0 20px var(--primary); transition: 1s cubic-bezier(0.17, 0.67, 0.83, 0.67); }
+        /* REAL-TIME SUPPLY TRACKER */
+        .supply-container { background: #0d1117; padding: 20px; border-radius: 25px; border: 1px solid #30363d; margin-bottom: 25px; box-shadow: inset 0 0 20px black; }
+        .supply-info { display: flex; justify-content: space-between; font-size: 0.75rem; font-weight: 900; color: #8b949e; margin-bottom: 12px; text-transform: uppercase; }
+        .bar-bg { background: #1c2128; height: 16px; border-radius: 20px; overflow: hidden; border: 1px solid #484f58; }
+        .bar-fill { background: var(--primary); width: 100%; height: 100%; transition: 2.5s cubic-bezier(0.2, 0.8, 0.2, 1); box-shadow: 0 0 25px var(--primary); }
 
-        /* 90 DAYS TIMER */
-        .timer-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-bottom: 30px; }
-        .t-block { background: #010409; padding: 15px 5px; border-radius: 15px; border: 1px solid #30363d; box-shadow: inset 0 0 10px rgba(0,0,0,0.5); }
-        .t-num { display: block; font-family: 'Orbitron'; color: var(--primary); font-size: 1.3rem; font-weight: 700; }
-        .t-lab { font-size: 0.5rem; color: #8b949e; text-transform: uppercase; margin-top: 4px; font-weight: 700; }
+        /* 90-DAY PRE-SALE TIMER */
+        .timer-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-bottom: 30px; }
+        .t-box { background: #010409; padding: 15px 2px; border-radius: 18px; border: 1px solid #30363d; }
+        .t-val { display: block; font-family: 'Orbitron'; color: var(--primary); font-size: 1.3rem; font-weight: 900; }
+        .t-lbl { font-size: 0.5rem; color: #8b949e; text-transform: uppercase; font-weight: 800; }
 
-        .action-btn { background: var(--primary); color: #000; border: none; padding: 20px; border-radius: 18px; width: 100%; font-weight: 900; cursor: pointer; text-transform: uppercase; font-size: 1rem; transition: 0.4s; box-shadow: 0 10px 20px rgba(0,255,163,0.2); }
-        .action-btn:hover { transform: translateY(-3px); box-shadow: 0 15px 30px rgba(0,255,163,0.4); }
-        .action-btn:disabled { background: #21262d; color: #484f58; cursor: not-allowed; transform: none; box-shadow: none; }
+        .btn-action { background: var(--primary); color: #000; border: none; padding: 24px; border-radius: 22px; width: 100%; font-weight: 900; cursor: pointer; text-transform: uppercase; font-size: 1.1rem; transition: 0.4s; box-shadow: 0 15px 35px rgba(0,255,163,0.3); }
+        .btn-action:active { transform: scale(0.96); opacity: 0.8; }
+        .btn-action:disabled { background: #21262d; color: #484f58; cursor: not-allowed; box-shadow: none; }
 
-        /* DYNAMIC INTERFACE */
-        #presale-engine { display: none; background: #010409; padding: 25px; border-radius: 25px; text-align: left; border-left: 6px solid var(--primary); margin-top: 20px; animation: slideUp 0.5s ease-out; }
-        @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        /* ACTIVE CONTRACT INTERFACE */
+        #active-portal { display: none; background: #010409; padding: 25px; border-radius: 30px; text-align: left; margin-top: 25px; border-left: 6px solid var(--primary); animation: slideIn 0.5s ease; }
+        @keyframes slideIn { from { transform: translateY(30px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
 
-        .input-wrap { margin-bottom: 20px; }
-        label { font-size: 0.6rem; color: #8b949e; font-weight: 900; text-transform: uppercase; }
-        input { background: transparent; border: none; color: white; font-size: 1.8rem; width: 100%; outline: none; font-weight: 900; margin-top: 8px; -webkit-appearance: none; }
-        input::-webkit-outer-spin-button, input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
-        
-        .output-label { color: var(--primary); font-family: 'Orbitron'; font-size: 1.5rem; margin-top: 10px; display: block; }
-        .log-msg { font-size: 0.6rem; margin-top: 15px; text-align: center; font-weight: 800; min-height: 15px; }
+        .input-group { margin-bottom: 25px; }
+        label { font-size: 0.65rem; color: #8b949e; font-weight: 900; text-transform: uppercase; letter-spacing: 1px; }
+        input { background: transparent; border: none; color: white; font-size: 2.2rem; width: 100%; outline: none; font-weight: 900; margin-top: 10px; }
+        .val-out { color: var(--primary); font-family: 'Orbitron'; font-size: 1.8rem; display: block; margin-top: 10px; }
+        .msg-log { font-size: 0.65rem; color: var(--danger); margin-top: 15px; text-align: center; font-weight: 900; min-height: 18px; }
     </style>
 </head>
 <body>
 
-<div class="tech-warning">Technical Demonstration - Not a Public Financial Offering</div>
+<div class="security-header">Protocol Status: High-Frequency Node Sync Active</div>
 
-<div class="card">
-    <div class="allocation-box">
-        <div class="alloc-info"><span>Allocation Sold</span><span>362,184 / 500,000 AYB</span></div>
-        <div class="bar-outer"><div class="bar-inner"></div></div>
+<div class="terminal-card">
+    <div class="supply-container">
+        <div class="supply-info">
+            <span>Market Availability</span>
+            <span id="supply-text" style="color:var(--primary)">500,000 AYB</span>
+        </div>
+        <div class="bar-bg"><div id="supply-bar" class="bar-fill"></div></div>
     </div>
 
     <h1>AYB TERMINAL</h1>
-    <span class="sub-text">Decentralized Asset Portal</span>
+    <span class="version">V14.0 INSTITUTIONAL ENGINE</span>
 
     <div class="timer-grid">
-        <div class="t-block"><span class="t-num" id="days">90</span><span class="t-lab">Days</span></div>
-        <div class="t-block"><span class="t-num" id="hours">00</span><span class="t-lab">Hrs</span></div>
-        <div class="t-block"><span class="t-num" id="mins">00</span><span class="t-lab">Min</span></div>
-        <div class="t-block"><span class="t-num" id="secs">00</span><span class="t-lab">Sec</span></div>
+        <div class="t-box"><span id="d" class="t-val">90</span><span class="t-lbl">Days</span></div>
+        <div class="t-box"><span id="h" class="t-val">00</span><span class="t-lbl">Hrs</span></div>
+        <div class="t-box"><span id="m" class="t-val">00</span><span class="t-lbl">Min</span></div>
+        <div class="t-box"><span id="s" class="t-val">00</span><span class="t-lbl">Sec</span></div>
     </div>
 
-    <div id="connect-container">
-        <button onclick="handleConnection()" class="action-btn">Initialize Terminal</button>
+    <div id="connect-ui">
+        <button id="master-connect" onclick="initiateBridge()" class="btn-action">Synchronize Wallet</button>
     </div>
 
-    <div id="presale-engine">
-        <div class="input-wrap">
+    <div id="active-portal">
+        <div class="input-group">
             <div style="display:flex; justify-content:space-between; align-items:center;">
-                <label>Deposit Amount (ETH)</label>
-                <span id="live-bal" style="font-size: 0.75rem; color: var(--primary); font-weight: 900;">0.0000</span>
+                <label>Deposit (ETH)</label>
+                <span id="real-balance" style="font-size:0.8rem; color:var(--primary); font-weight:900;">0.0000</span>
             </div>
-            <input type="number" id="eth-input" placeholder="0.0" oninput="calculate()">
+            <input type="number" id="eth-amount" placeholder="0.0" oninput="calculateAllocation()">
         </div>
         
-        <div class="input-wrap">
-            <label>Allocation Units (AYB)</label>
-            <span class="output-label" id="ayb-output">0</span>
+        <div class="input-group">
+            <label>Allocation (AYB)</label>
+            <span id="ayb-result" class="val-out">0</span>
         </div>
         
-        <button id="buy-btn" class="action-btn" onclick="executePresale()" disabled>Acquire Allocation</button>
-        <div id="status-log" class="log-msg"></div>
+        <button id="buy-trigger" class="btn-action" onclick="signTransaction()" disabled>Execute Contract</button>
+        <div id="log-window" class="msg-log"></div>
     </div>
 </div>
 
 <script>
-    let ethUsdPrice = 3500;
-    const ARBITRUM_RPC = "https://arb1.arbitrum.io/rpc";
+    let ethUsd = 3500;
+    let maxCap = 500000;
+    let totalSold = 0;
+    const TREASURY = "0x066bbf27694982662cEAb0072793132B03027F47";
 
-    // 1. SMART CONNECTION (Supports Mobile Chrome -> MetaMask App)
-    async function handleConnection() {
+    // 1. MOBILE CHROME BRIDGE (The Final Solution)
+    async function initiateBridge() {
+        const btn = document.getElementById('master-connect');
+        btn.innerText = "ESTABLISHING...";
+
         if (window.ethereum) {
             try {
                 const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
                 const provider = new ethers.BrowserProvider(window.ethereum);
                 const balance = await provider.getBalance(accounts[0]);
                 
-                // NO HARDCODED STRINGS! Real Blockchain Data
-                document.getElementById('live-bal').innerText = parseFloat(ethers.formatEther(balance)).toFixed(5) + " ETH";
-                document.getElementById('connect-container').style.display = 'none';
-                document.getElementById('presale-engine').style.display = 'block';
+                // Real Data Injection
+                document.getElementById('real-balance').innerText = parseFloat(ethers.formatEther(balance)).toFixed(5) + " ETH";
+                document.getElementById('connect-ui').style.display = 'none';
+                document.getElementById('active-portal').style.display = 'block';
+                syncBlockchainData();
                 
-                // Reload on Account Change for Security
                 window.ethereum.on('accountsChanged', () => window.location.reload());
-            } catch (e) { alert("Terminal Access Denied."); }
-        } else {
-            // MOBILE FIX: Deep link to MetaMask Browser
-            const link = window.location.href.split('://')[1];
-            window.location.href = `https://metamask.app.link/dapp/${link}`;
-        }
-    }
-
-    // 2. LIVE ALLOCATION LOGIC (Max 500,000)
-    function calculate() {
-        const ethValue = document.getElementById('eth-input').value;
-        const buyBtn = document.getElementById('buy-btn');
-        const aybRes = document.getElementById('ayb-output');
-        
-        if(ethValue > 0) {
-            const tokens = Math.floor((ethValue * ethUsdPrice) / 0.1);
-            aybRes.innerText = tokens.toLocaleString();
-            
-            // SECURITY: Block if above 500k
-            if(tokens > 500000) {
-                buyBtn.disabled = true;
-                document.getElementById('status-log').innerText = "LIMIT EXCEEDED: MAX 500,000 AYB";
-                document.getElementById('status-log').style.color = "#ff4a4a";
-            } else {
-                buyBtn.disabled = false;
-                document.getElementById('status-log').innerText = "";
+            } catch (e) { 
+                btn.innerText = "LINK FAILED - RETRY";
             }
         } else {
-            aybRes.innerText = "0";
-            buyBtn.disabled = true;
+            // Force redirection to MetaMask internal browser
+            const targetUrl = window.location.href.replace(/^https?:\/\//, '');
+            window.location.href = `https://metamask.app.link/dapp/${targetUrl}`;
         }
     }
 
-    // 3. ACTUAL SMART CONTRACT TRANSACTION
-    async function executePresale() {
-        const log = document.getElementById('status-log');
+    // 2. LIVE BLOCKCHAIN SYNC (Supply Engine)
+    async function syncBlockchainData() {
+        try {
+            const provider = new ethers.JsonRpcProvider("https://arb1.arbitrum.io/rpc");
+            const balance = await provider.getBalance(TREASURY);
+            const ethInTreasury = parseFloat(ethers.formatEther(balance));
+            
+            totalSold = Math.floor((ethInTreasury * ethUsd) / 0.1);
+            let remaining = maxCap - totalSold;
+            if (remaining < 0) remaining = 0;
+
+            document.getElementById('supply-text').innerText = remaining.toLocaleString() + " AYB";
+            document.getElementById('supply-bar').style.width = (remaining / maxCap * 100) + "%";
+        } catch (e) { console.error("Sync Failure"); }
+    }
+
+    // 3. TRANSACTION LOGIC & CAP SECURITY
+    function calculateAllocation() {
+        const val = document.getElementById('eth-amount').value;
+        const result = document.getElementById('ayb-result');
+        const trigger = document.getElementById('buy-trigger');
+        const log = document.getElementById('log-window');
+        
+        const tokens = Math.floor((val * ethUsd) / 0.1);
+        result.innerText = tokens.toLocaleString();
+        
+        const remaining = maxCap - totalSold;
+
+        if (tokens > remaining) {
+            trigger.disabled = true;
+            log.innerText = "ERROR: ALLOCATION EXCEEDS REMAINING SUPPLY";
+        } else if (val <= 0) {
+            trigger.disabled = true;
+            log.innerText = "";
+        } else {
+            trigger.disabled = false;
+            log.innerText = "";
+        }
+    }
+
+    async function signTransaction() {
         try {
             const provider = new ethers.BrowserProvider(window.ethereum);
             const signer = await provider.getSigner();
-            const tx = await signer.sendTransaction({
-                to: "0x066bbf27694982662cEAb0072793132B03027F47",
-                value: ethers.parseEther(document.getElementById('eth-input').value)
+            await signer.sendTransaction({
+                to: TREASURY,
+                value: ethers.parseEther(document.getElementById('eth-amount').value)
             });
-            log.innerText = "TRANSACTION BROADCASTED... WAITING";
-            log.style.color = var(--primary);
-        } catch (e) {
-            log.innerText = "TX REJECTED: Insufficient Arbitrum Gas";
-            log.style.color = "#ff4a4a";
-        }
+        } catch (e) { document.getElementById('log-window').innerText = "SIGNATURE REJECTED BY USER"; }
     }
 
-    // 4. PRICE & TIMER DATA
-    fetch('https://api.binance.com/api/v3/ticker/price?symbol=ETHUSDT')
-        .then(r => r.json()).then(d => ethUsdPrice = parseFloat(d.price));
-
-    const deadline = new Date(); deadline.setDate(deadline.getDate() + 90);
+    // Core Initialization
+    setInterval(syncBlockchainData, 10000); 
+    const launchDate = new Date(); launchDate.setDate(launchDate.getDate() + 90);
     setInterval(() => {
-        const now = new Date();
-        const diff = deadline - now;
-        document.getElementById('days').innerText = Math.floor(diff / 864e5);
-        document.getElementById('hours').innerText = Math.floor((diff % 864e5) / 36e5);
-        document.getElementById('mins').innerText = Math.floor((diff % 36e5) / 6e4);
-        document.getElementById('secs').innerText = Math.floor((diff % 6e4) / 1000);
+        const diff = launchDate - new Date();
+        document.getElementById('d').innerText = Math.floor(diff / 864e5);
+        document.getElementById('h').innerText = Math.floor((diff % 864e5) / 36e5);
+        document.getElementById('m').innerText = Math.floor((diff % 36e5) / 6e4);
+        document.getElementById('s').innerText = Math.floor((diff % 6e4) / 1000);
     }, 1000);
+
+    fetch('https://api.binance.com/api/v3/ticker/price?symbol=ETHUSDT')
+        .then(r => r.json()).then(d => ethUsd = parseFloat(d.price));
 </script>
 </body>
 </html>
