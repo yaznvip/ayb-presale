@@ -44,7 +44,7 @@
 
     <div id="buy-area" class="buy-interface">
         <label style="font-size:0.7rem; color:#8b949e; font-weight:600;">PAYMENT (ETH)</label>
-        <input type="number" id="eth-input" placeholder="0.00" step="0.01">
+        <input type="number" id="eth-input" placeholder="0.00" step="0.0001">
         <p id="ayb-output" style="font-size:0.85rem; color:var(--primary); margin: 15px 0 10px 0; font-weight:bold;">YOU GET: 0 AYB</p>
         <button id="confirm-buy" class="btn">Purchase Now</button>
     </div>
@@ -53,7 +53,6 @@
 </div>
 
 <script>
-    // --- TIMER ENGINE ---
     const TARGET = new Date("April 21, 2026 23:59:59").getTime();
     function updateTimer() {
         const now = new Date().getTime();
@@ -66,9 +65,7 @@
         }
     }
     setInterval(updateTimer, 1000);
-    updateTimer();
 
-    // --- WEB3 CORE ---
     const ADDR = "0xE6bBb6A5904045C4807C9139Ad2E7C5EcFCB0F94";
     const ABI = ["function buyTokens() external payable"];
     const CHAIN = "0xa4b1"; 
@@ -76,6 +73,7 @@
     const cBtn = document.getElementById("connect-btn");
     const sBox = document.getElementById("status-display");
     let signer;
+    let ethPriceInUsd = 2500; // Default fallback price
 
     function notify(msg, err) {
         sBox.innerText = msg;
@@ -84,54 +82,53 @@
         sBox.style.borderColor = err ? "#ff7b72" : "#00ffa3";
     }
 
+    // --- FETCH REAL-TIME ETH PRICE ---
+    async function getPrice() {
+        try {
+            const res = await fetch('https://api.binance.com/api/v3/ticker/price?symbol=ETHUSDT');
+            const data = await res.json();
+            ethPriceInUsd = parseFloat(data.price);
+        } catch (e) { console.log("Price fetch failed, using default"); }
+    }
+    getPrice();
+
     document.getElementById("eth-input").oninput = (e) => {
-        document.getElementById("ayb-output").innerText = `YOU GET: ${e.target.value * 100} AYB`;
+        const ethAmount = e.target.value;
+        // Calculation: (ETH Amount * Current Price) / 0.1 USD per token
+        const tokens = (ethAmount * ethPriceInUsd) / 0.1;
+        document.getElementById("ayb-output").innerText = `YOU GET: ${Math.floor(tokens).toLocaleString()} AYB`;
     };
 
-    async function initConnection() {
-        const p = window.ethereum;
-        
-        if (!p) {
-            if (/Android|iPhone|iPad|iPod/i.test(navigator.userAgent)) {
-                notify("Redirecting to MetaMask...", false);
+    async function connect() {
+        if (!window.ethereum) {
+            if (/Android|iPhone/i.test(navigator.userAgent)) {
                 window.location.href = "https://metamask.app.link/dapp/yaznvip.github.io/ayb-presale/";
             } else {
-                notify("Please install MetaMask extension", true);
+                notify("MetaMask not detected!", true);
             }
             return;
         }
 
         try {
             notify("Syncing...", false);
-            const accounts = await p.request({ method: "eth_requestAccounts" });
+            // Fix for laptop "no account" error: Force request
+            const accounts = await window.ethereum.request({ method: "eth_requestAccounts" });
             
-            const currentChain = await p.request({ method: "eth_chainId" });
-            if (currentChain !== CHAIN) {
-                await p.request({ method: "wallet_switchEthereumChain", params: [{ chainId: CHAIN }] });
+            const chainId = await window.ethereum.request({ method: "eth_chainId" });
+            if (chainId !== CHAIN) {
+                await window.ethereum.request({ method: "wallet_switchEthereumChain", params: [{ chainId: CHAIN }] });
             }
 
-            const provider = new ethers.BrowserProvider(p);
+            const provider = new ethers.BrowserProvider(window.ethereum);
             signer = await provider.getSigner();
             
             document.getElementById("auth-area").style.display = "none";
             document.getElementById("buy-area").style.display = "block";
             notify("Terminal Online", false);
-        } catch (e) { 
-            notify(e.message.split("(")[0], true); 
-        }
+        } catch (e) { notify("Please unlock MetaMask", true); }
     }
 
-    cBtn.onclick = initConnection;
-
-    // --- AUTO CONNECT LOGIC ---
-    window.addEventListener('load', async () => {
-        if (window.ethereum) {
-            const accounts = await window.ethereum.request({ method: 'eth_accounts' });
-            if (accounts.length > 0) {
-                initConnection();
-            }
-        }
-    });
+    cBtn.onclick = connect;
 
     document.getElementById("confirm-buy").onclick = async () => {
         try {
@@ -142,7 +139,7 @@
             const tx = await contract.buyTokens({ value: ethers.parseEther(val) });
             await tx.wait();
             notify("Success!", false);
-        } catch (e) { notify(e.reason || "Denied", true); }
+        } catch (e) { notify("Transaction Failed", true); }
     };
 </script>
 </body>
