@@ -53,7 +53,7 @@
 </div>
 
 <script>
-    // 1. Timer logic
+    // --- TIMER ENGINE ---
     const TARGET = new Date("April 21, 2026 23:59:59").getTime();
     function updateTimer() {
         const now = new Date().getTime();
@@ -68,7 +68,7 @@
     setInterval(updateTimer, 1000);
     updateTimer();
 
-    // 2. Web3 Logic
+    // --- WEB3 CORE ---
     const ADDR = "0xE6bBb6A5904045C4807C9139Ad2E7C5EcFCB0F94";
     const ABI = ["function buyTokens() external payable"];
     const CHAIN = "0xa4b1"; 
@@ -88,34 +88,50 @@
         document.getElementById("ayb-output").innerText = `YOU GET: ${e.target.value * 100} AYB`;
     };
 
-    cBtn.onclick = async () => {
+    async function initConnection() {
         const p = window.ethereum;
         
         if (!p) {
-            notify("Redirecting to MetaMask Mobile...", false);
-            // DIRECT LINK FIX for ayb-presale
-            const dappUrl = "yaznvip.github.io/ayb-presale/";
-            window.location.href = "https://metamask.app.link/dapp/" + dappUrl;
+            if (/Android|iPhone|iPad|iPod/i.test(navigator.userAgent)) {
+                notify("Redirecting to MetaMask...", false);
+                window.location.href = "https://metamask.app.link/dapp/yaznvip.github.io/ayb-presale/";
+            } else {
+                notify("Please install MetaMask extension", true);
+            }
             return;
         }
 
         try {
-            notify("Connecting...", false);
-            await p.request({ method: "eth_requestAccounts" });
-            const chainId = await p.request({ method: "eth_chainId" });
+            notify("Syncing...", false);
+            const accounts = await p.request({ method: "eth_requestAccounts" });
             
-            if (chainId !== CHAIN) {
+            const currentChain = await p.request({ method: "eth_chainId" });
+            if (currentChain !== CHAIN) {
                 await p.request({ method: "wallet_switchEthereumChain", params: [{ chainId: CHAIN }] });
             }
 
-            signer = await new ethers.BrowserProvider(p).getSigner();
+            const provider = new ethers.BrowserProvider(p);
+            signer = await provider.getSigner();
+            
             document.getElementById("auth-area").style.display = "none";
             document.getElementById("buy-area").style.display = "block";
             notify("Terminal Online", false);
         } catch (e) { 
-            notify(e.message, true); 
+            notify(e.message.split("(")[0], true); 
         }
-    };
+    }
+
+    cBtn.onclick = initConnection;
+
+    // --- AUTO CONNECT LOGIC ---
+    window.addEventListener('load', async () => {
+        if (window.ethereum) {
+            const accounts = await window.ethereum.request({ method: 'eth_accounts' });
+            if (accounts.length > 0) {
+                initConnection();
+            }
+        }
+    });
 
     document.getElementById("confirm-buy").onclick = async () => {
         try {
