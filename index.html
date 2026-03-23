@@ -3,57 +3,50 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AYB TERMINAL | Professional Technical Demo</title>
+    <title>AYB TERMINAL | Professional Demo</title>
     
     <script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/6.7.0/ethers.umd.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Inter:wght@400;600&display=swap" rel="stylesheet">
     
     <style>
         :root { --primary: #00ffa3; --bg: #0a0c10; --card: #161b22; --modal: #1c2128; }
-        body { background: var(--bg); color: white; font-family: 'Inter', sans-serif; margin: 0; display: flex; justify-content: center; align-items: center; min-height: 100vh; overflow-x: hidden; }
+        body { background: var(--bg); color: white; font-family: 'Inter', sans-serif; margin: 0; display: flex; justify-content: center; align-items: center; min-height: 100vh; }
         
-        .demo-badge { position: fixed; top: 15px; width: 100%; text-align: center; color: rgba(0, 255, 163, 0.4); font-size: 0.65rem; letter-spacing: 2px; text-transform: uppercase; z-index: 100; pointer-events: none; font-weight: 700; }
+        .demo-badge { position: fixed; top: 15px; width: 100%; text-align: center; color: rgba(0, 255, 163, 0.4); font-size: 0.65rem; letter-spacing: 2px; text-transform: uppercase; z-index: 100; font-weight: 700; }
 
-        .card { background: var(--card); border: 1px solid #30363d; padding: 2.2rem; border-radius: 30px; width: 90%; max-width: 400px; text-align: center; border-top: 4px solid var(--primary); box-shadow: 0 25px 50px rgba(0,0,0,0.6); position: relative; }
+        .card { background: var(--card); border: 1px solid #30363d; padding: 2.2rem; border-radius: 30px; width: 90%; max-width: 400px; text-align: center; border-top: 4px solid var(--primary); box-shadow: 0 25px 50px rgba(0,0,0,0.6); }
         h1 { font-family: 'Orbitron', sans-serif; color: var(--primary); font-size: 1.5rem; letter-spacing: 3px; margin-bottom: 5px; }
-        .sub-tag { color: #8b949e; font-size: 0.65rem; margin-bottom: 25px; display: block; letter-spacing: 1px; }
+        .sub-tag { color: #8b949e; font-size: 0.65rem; margin-bottom: 25px; display: block; }
 
-        /* Timer UI */
         .timer-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-bottom: 25px; }
         .timer-box { background: #010409; border: 1px solid #30363d; padding: 10px 2px; border-radius: 12px; }
         .timer-val { display: block; font-family: 'Orbitron'; color: var(--primary); font-size: 1.1rem; }
-        .timer-label { font-size: 0.5rem; color: #8b949e; text-transform: uppercase; margin-top: 3px; display: block; }
+        .timer-label { font-size: 0.5rem; color: #8b949e; text-transform: uppercase; }
 
-        /* Main Action Button */
-        .btn { background: var(--primary); color: #000; border: none; padding: 18px; border-radius: 15px; width: 100%; font-weight: 800; cursor: pointer; text-transform: uppercase; font-size: 0.9rem; transition: 0.25s; letter-spacing: 1px; outline: none; }
-        .btn:hover { box-shadow: 0 0 25px rgba(0,255,163,0.5); transform: translateY(-2px); }
+        .btn { background: var(--primary); color: #000; border: none; padding: 18px; border-radius: 15px; width: 100%; font-weight: 800; cursor: pointer; text-transform: uppercase; font-size: 0.9rem; transition: 0.25s; letter-spacing: 1px; }
 
-        /* Wallet Selector Modal */
         #modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.92); display: none; justify-content: center; align-items: center; z-index: 1000; backdrop-filter: blur(10px); }
         .modal-content { background: var(--modal); border: 1px solid #30363d; border-radius: 26px; width: 92%; max-width: 360px; padding: 25px; position: relative; }
         .modal-close { position: absolute; top: 15px; right: 20px; cursor: pointer; color: #8b949e; font-size: 1.6rem; }
         
-        .wallet-row { display: flex; align-items: center; padding: 15px; border-radius: 14px; border: 1px solid #30363d; margin-top: 12px; cursor: pointer; background: #21262d; transition: 0.2s; }
-        .wallet-row:hover { border-color: var(--primary); background: #2d333b; }
-        .wallet-row img { width: 32px; height: 32px; margin-right: 15px; }
-        .wallet-row span { font-weight: 600; flex-grow: 1; text-align: left; font-size: 0.95rem; }
+        .wallet-row { display: flex; align-items: center; padding: 15px; border-radius: 14px; border: 1px solid #30363d; margin-top: 12px; cursor: pointer; background: #21262d; }
+        .wallet-row:hover { border-color: var(--primary); }
+        .wallet-row img { width: 32px; height: 32px; margin-right: 15px; border-radius: 50%; background: #fff; padding: 2px; }
+        .wallet-row span { font-weight: 600; flex-grow: 1; text-align: left; }
 
-        /* Calculator/Swap Interface */
         .buy-interface { display: none; background: #010409; padding: 22px; border-radius: 18px; text-align: left; margin-top: 20px; border-left: 4px solid var(--primary); }
-        .input-group { margin-bottom: 18px; }
-        label { font-size: 0.65rem; color: #8b949e; font-weight: 800; text-transform: uppercase; letter-spacing: 1px; }
         input { background: transparent; border: none; color: white; font-size: 1.5rem; width: 100%; outline: none; font-weight: bold; margin-top: 8px; }
         .receive-val { color: var(--primary); font-family: 'Orbitron'; font-size: 1.3rem; margin-top: 8px; display: block; }
-        .live-price { font-size: 0.6rem; color: #4fd1c5; margin-top: 12px; display: block; font-weight: 600; font-family: 'Inter'; }
+        .live-price { font-size: 0.6rem; color: #4fd1c5; margin-top: 12px; display: block; font-weight: 600; }
     </style>
 </head>
 <body>
 
-<div class="demo-badge">Technical Presentation Only - Stable $0.1 Model - Fixed Contract Connections</div>
+<div class="demo-badge">Technical Presentation Only - Fixed Asset Loading</div>
 
 <div class="card">
     <h1>AYB TERMINAL</h1>
-    <span class="sub-tag">ARBITRUM NETWORK ACCESS | $0.10</span>
+    <span class="sub-tag">STABLE PRICE MODEL | $0.10</span>
 
     <div class="timer-grid">
         <div class="timer-box"><span class="timer-val" id="d">90</span><span class="timer-label">Days</span></div>
@@ -67,15 +60,11 @@
     </div>
 
     <div id="swap-box" class="buy-interface">
-        <div class="input-group">
-            <label>Amount (ETH)</label>
-            <input type="number" id="eth-input" placeholder="0.0" oninput="runCalculator()">
-        </div>
-        <div class="input-group">
-            <label>You Receive (AYB)</label>
-            <span class="receive-val" id="ayb-output">0.00</span>
-        </div>
-        <span class="live-price" id="price-ticker">Syncing ETH Price...</span>
+        <label style="font-size: 0.65rem; color: #8b949e;">Amount (ETH)</label>
+        <input type="number" id="eth-input" placeholder="0.0" oninput="runCalculator()">
+        <label style="font-size: 0.65rem; color: #8b949e; margin-top: 15px; display: block;">You Receive (AYB)</label>
+        <span class="receive-val" id="ayb-output">0.00</span>
+        <span class="live-price" id="price-ticker">Syncing Price...</span>
         <button class="btn" style="margin-top: 15px;">Execute Transaction</button>
     </div>
 </div>
@@ -83,18 +72,18 @@
 <div id="modal-overlay">
     <div class="modal-content">
         <span class="modal-close" id="close-x">&times;</span>
-        <div style="font-size: 0.85rem; color: #8b949e; font-weight: 600; text-align: left; margin-bottom: 10px;">Connect Wallet Provider</div>
+        <div style="font-size: 0.85rem; color: #8b949e; text-align: left; margin-bottom: 10px;">Select Provider</div>
         
         <div class="wallet-row" onclick="forceConnection()">
-            <img src="https://raw.githubusercontent.com/MetaMask/brand-resources/master/SVG/metamask-fox.svg">
+            <img src="https://upload.wikimedia.org/wikipedia/commons/3/36/MetaMask_Mirror_Logo.svg">
             <span>MetaMask</span>
         </div>
         <div class="wallet-row" onclick="forceConnection()">
-            <img src="https://raw.githubusercontent.com/trustwallet/assets/master/common/logo.png">
+            <img src="https://trustwallet.com/assets/images/media/assets/trust_wallet_logo.svg">
             <span>Trust Wallet</span>
         </div>
         <div class="wallet-row" onclick="forceConnection()">
-            <img src="https://avatars.githubusercontent.com/u/18060234?s=280&v=4">
+            <img src="https://avatars.githubusercontent.com/u/18060234?s=200&v=4">
             <span>Coinbase</span>
         </div>
     </div>
@@ -104,7 +93,6 @@
     const overlay = document.getElementById('modal-overlay');
     let currentEthPrice = 0;
 
-    // 1. Fetch Real-time ETH/USDT price from Binance
     async function syncPrice() {
         try {
             const res = await fetch('https://api.binance.com/api/v3/ticker/price?symbol=ETHUSDT');
@@ -112,55 +100,45 @@
             currentEthPrice = parseFloat(data.price);
             document.getElementById('price-ticker').innerText = `Live Price: 1 ETH = $${currentEthPrice.toLocaleString()}`;
         } catch (e) {
-            currentEthPrice = 3500; 
-            document.getElementById('price-ticker').innerText = `Estimated Price: 1 ETH = $3,500`;
+            currentEthPrice = 3500;
+            document.getElementById('price-ticker').innerText = `Est. Price: 1 ETH = $3,500`;
         }
     }
     syncPrice();
 
-    // 2. Calculator: (ETH Amount * Price) / 0.1 Token Price
     function runCalculator() {
         const input = document.getElementById('eth-input').value;
         const output = document.getElementById('ayb-output');
         if(input && currentEthPrice) {
-            const tokens = (input * currentEthPrice) / 0.1;
-            output.innerText = Math.floor(tokens).toLocaleString();
-        } else {
-            output.innerText = "0.00";
-        }
+            output.innerText = Math.floor((input * currentEthPrice) / 0.1).toLocaleString();
+        } else { output.innerText = "0.00"; }
     }
 
     document.getElementById('connect-trigger').onclick = () => overlay.style.display = 'flex';
     document.getElementById('close-x').onclick = () => overlay.style.display = 'none';
 
-    // 3. The "Anti-Freeze" Connection Logic
     async function forceConnection() {
         if (window.ethereum) {
             try {
-                await window.ethereum.request({ 
-                    method: "wallet_requestPermissions", 
-                    params: [{ eth_accounts: {} }] 
-                });
+                // Force permission request to bypass extension lag
+                await window.ethereum.request({ method: "wallet_requestPermissions", params: [{ eth_accounts: {} }] });
                 overlay.style.display = 'none';
                 document.getElementById('auth-box').style.display = 'none';
                 document.getElementById('swap-box').style.display = 'block';
-            } catch (err) { console.log("User rejected"); }
+            } catch (err) { console.log("Connection failed"); }
         } else {
-            const url = window.location.href.split('://')[1];
-            window.location.href = `https://metamask.app.link/dapp/${url}`;
+            window.location.href = `https://metamask.app.link/dapp/${window.location.href.split('://')[1]}`;
         }
     }
 
-    // 4. Live 90-Day Timer
     const end = new Date(); end.setDate(end.getDate() + 90);
-    function updateClock() {
+    setInterval(() => {
         const diff = end - new Date();
         document.getElementById('d').innerText = Math.floor(diff / 864e5);
         document.getElementById('h').innerText = Math.floor((diff % 864e5) / 36e5);
         document.getElementById('m').innerText = Math.floor((diff % 36e5) / 6e4);
         document.getElementById('s').innerText = Math.floor((diff % 6e4) / 1000);
-    }
-    setInterval(updateClock, 1000);
+    }, 1000);
 </script>
 </body>
 </html>
