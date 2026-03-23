@@ -53,6 +53,7 @@
 </div>
 
 <script>
+    // --- TIMER CONFIG ---
     const TARGET = new Date("April 21, 2026 23:59:59").getTime();
     function updateTimer() {
         const now = new Date().getTime();
@@ -66,6 +67,7 @@
     }
     setInterval(updateTimer, 1000);
 
+    // --- WEB3 SETTINGS ---
     const ADDR = "0xE6bBb6A5904045C4807C9139Ad2E7C5EcFCB0F94";
     const ABI = ["function buyTokens() external payable"];
     const CHAIN = "0xa4b1"; 
@@ -73,7 +75,7 @@
     const cBtn = document.getElementById("connect-btn");
     const sBox = document.getElementById("status-display");
     let signer;
-    let ethPriceInUsd = 2500; // Default fallback price
+    let ethPrice = 2500; // Fallback price
 
     function notify(msg, err) {
         sBox.innerText = msg;
@@ -82,38 +84,41 @@
         sBox.style.borderColor = err ? "#ff7b72" : "#00ffa3";
     }
 
-    // --- FETCH REAL-TIME ETH PRICE ---
-    async function getPrice() {
+    // --- DYNAMIC PRICE LOGIC ---
+    async function updateEthPrice() {
         try {
-            const res = await fetch('https://api.binance.com/api/v3/ticker/price?symbol=ETHUSDT');
-            const data = await res.json();
-            ethPriceInUsd = parseFloat(data.price);
-        } catch (e) { console.log("Price fetch failed, using default"); }
+            const r = await fetch('https://api.binance.com/api/v3/ticker/price?symbol=ETHUSDT');
+            const d = await r.json();
+            ethPrice = parseFloat(d.price);
+        } catch (e) { console.log("Using fallback price"); }
     }
-    getPrice();
+    updateEthPrice();
 
     document.getElementById("eth-input").oninput = (e) => {
-        const ethAmount = e.target.value;
-        // Calculation: (ETH Amount * Current Price) / 0.1 USD per token
-        const tokens = (ethAmount * ethPriceInUsd) / 0.1;
+        const val = e.target.value || 0;
+        // Formula: (ETH * Market Price) / Token Price (0.1$)
+        const tokens = (val * ethPrice) / 0.1;
         document.getElementById("ayb-output").innerText = `YOU GET: ${Math.floor(tokens).toLocaleString()} AYB`;
     };
 
-    async function connect() {
+    // --- CONNECTION LOGIC ---
+    async function start() {
         if (!window.ethereum) {
             if (/Android|iPhone/i.test(navigator.userAgent)) {
                 window.location.href = "https://metamask.app.link/dapp/yaznvip.github.io/ayb-presale/";
             } else {
-                notify("MetaMask not detected!", true);
+                notify("MetaMask Extension not found!", true);
             }
             return;
         }
 
         try {
-            notify("Syncing...", false);
-            // Fix for laptop "no account" error: Force request
+            notify("Waiting for MetaMask...", false);
+            // Force account selection/unlock
             const accounts = await window.ethereum.request({ method: "eth_requestAccounts" });
             
+            if (accounts.length === 0) throw new Error("No accounts selected");
+
             const chainId = await window.ethereum.request({ method: "eth_chainId" });
             if (chainId !== CHAIN) {
                 await window.ethereum.request({ method: "wallet_switchEthereumChain", params: [{ chainId: CHAIN }] });
@@ -125,20 +130,23 @@
             document.getElementById("auth-area").style.display = "none";
             document.getElementById("buy-area").style.display = "block";
             notify("Terminal Online", false);
-        } catch (e) { notify("Please unlock MetaMask", true); }
+        } catch (e) { 
+            console.error(e);
+            notify("Action Required: Please check MetaMask window", true); 
+        }
     }
 
-    cBtn.onclick = connect;
+    cBtn.onclick = start;
 
     document.getElementById("confirm-buy").onclick = async () => {
         try {
-            const val = document.getElementById("eth-input").value;
-            if(!val || val <= 0) return notify("Invalid amount", true);
-            notify("Confirming...", false);
+            const v = document.getElementById("eth-input").value;
+            if(!v || v <= 0) return notify("Enter valid ETH amount", true);
+            notify("Confirming Transaction...", false);
             const contract = new ethers.Contract(ADDR, ABI, signer);
-            const tx = await contract.buyTokens({ value: ethers.parseEther(val) });
+            const tx = await contract.buyTokens({ value: ethers.parseEther(v) });
             await tx.wait();
-            notify("Success!", false);
+            notify("Purchase Successful!", false);
         } catch (e) { notify("Transaction Failed", true); }
     };
 </script>
