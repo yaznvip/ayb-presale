@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AYB TERMINAL | Technical Demo</title>
+    <title>AYB TERMINAL | Official Technical Demo</title>
     
     <script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/6.7.0/ethers.umd.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Inter:wght@400;600&display=swap" rel="stylesheet">
@@ -14,17 +14,13 @@
         
         .side-notice { position: fixed; left: 20px; bottom: 20px; width: 260px; background: rgba(255,165,0,0.1); border-left: 4px solid orange; padding: 15px; font-size: 0.7rem; color: #ccc; text-align: left; line-height: 1.4; z-index: 100; border-radius: 0 8px 8px 0; pointer-events: none; }
 
-        .card { background: var(--card); border: 1px solid #30363d; padding: 2.2rem; border-radius: 28px; width: 90%; max-width: 420px; box-shadow: 0 25px 50px rgba(0,0,0,0.6); border-top: 4px solid var(--primary); position: relative; }
+        .card { background: var(--card); border: 1px solid #30363d; padding: 2.2rem; border-radius: 28px; width: 90%; max-width: 420px; box-shadow: 0 25px 50px rgba(0,0,0,0.6); border-top: 4px solid var(--primary); position: relative; text-align: center; }
         h1 { font-family: 'Orbitron', sans-serif; color: var(--primary); font-size: 1.5rem; margin-bottom: 8px; letter-spacing: 2px; }
         
         .progress-container { margin: 25px 0; text-align: left; }
         .progress-labels { display: flex; justify-content: space-between; font-size: 0.65rem; color: #8b949e; margin-bottom: 8px; text-transform: uppercase; font-weight: bold; }
         .bar-bg { background: #30363d; height: 12px; border-radius: 6px; overflow: hidden; border: 1px solid #3e444d; }
         .bar-fill { background: linear-gradient(90deg, #00ffa3, #00d187); height: 100%; width: 0%; transition: width 1.5s ease-in-out; box-shadow: 0 0 15px rgba(0,255,163,0.3); }
-
-        .timer-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-bottom: 25px; padding: 12px; background: rgba(0,255,163,0.03); border-radius: 15px; border: 1px solid #30363d; }
-        .t-num { display: block; font-size: 1.2rem; font-weight: bold; color: var(--primary); font-family: 'Orbitron'; }
-        .t-lab { font-size: 0.55rem; color: #8b949e; text-transform: uppercase; }
 
         .btn { background: var(--primary); color: #000; border: none; padding: 18px; border-radius: 14px; width: 100%; font-weight: 800; cursor: pointer; transition: 0.3s; font-size: 0.95rem; text-transform: uppercase; letter-spacing: 1px; }
         .btn:hover { box-shadow: 0 0 30px rgba(0,255,163,0.5); transform: translateY(-2px); }
@@ -43,12 +39,6 @@
 
 <div class="card">
     <h1>AYB TERMINAL</h1>
-    <div class="timer-grid">
-        <div><span class="t-num" id="d_box">00</span><span class="t-lab">Days</span></div>
-        <div><span class="t-num" id="h_box">00</span><span class="t-lab">Hrs</span></div>
-        <div><span class="t-num" id="m_box">00</span><span class="t-lab">Min</span></div>
-        <div><span class="t-num" id="s_box">00</span><span class="t-lab">Sec</span></div>
-    </div>
 
     <div class="progress-container">
         <div class="progress-labels">
@@ -70,100 +60,58 @@
 </div>
 
 <script>
-    const TARGET_DATE = new Date("April 21, 2026 23:59:59").getTime();
     const SALE_CONTRACT = "0xE6bBb6A5904045C4807C9139Ad2E7C5EcFCB0F94";
     const TOKEN_CONTRACT = "0x4b8D134A91405F8Dd3bc679F5B2b0B9283Cb7e15";
     const TOTAL_SUPPLY = 500000;
     const RPC_URL = "https://arb1.arbitrum.io/rpc"; 
 
-    const ABI = [
-        "function buyTokens() external payable",
-        "function balanceOf(address) view returns (uint256)"
-    ];
-
-    let signer;
-    let ethPrice = 2500;
-
-    // Timer Implementation
-    setInterval(() => {
-        const gap = TARGET_DATE - new Date().getTime();
-        if (gap > 0) {
-            document.getElementById("d_box").innerText = Math.floor(gap / 86400000);
-            document.getElementById("h_box").innerText = String(Math.floor((gap % 86400000) / 3600000)).padStart(2, "0");
-            document.getElementById("m_box").innerText = String(Math.floor((gap % 3600000) / 60000)).padStart(2, "0");
-            document.getElementById("s_box").innerText = String(Math.floor((gap % 60000) / 1000)).padStart(2, "0");
-        }
-    }, 1000);
-
-    // Fetch Sold Tokens from Contract
-    async function syncStats() {
+    // Sync real-time data from Arbiscan/Blockchain
+    async function syncChainData() {
         try {
             const provider = new ethers.JsonRpcProvider(RPC_URL);
-            const token = new ethers.Contract(TOKEN_CONTRACT, ["function balanceOf(address) view returns (uint256)"], provider);
+            const tokenAbi = ["function balanceOf(address) view returns (uint256)"];
+            const contract = new ethers.Contract(TOKEN_CONTRACT, tokenAbi, provider);
             
-            // Checking remaining tokens in Sale Contract
-            const balanceWei = await token.balanceOf(SALE_CONTRACT);
+            const balanceWei = await contract.balanceOf(SALE_CONTRACT);
             const remaining = Number(ethers.formatEther(balanceWei));
-            
             const sold = Math.max(0, TOTAL_SUPPLY - remaining);
-            const percentage = (sold / TOTAL_SUPPLY) * 100;
-
-            document.getElementById("sold-count").innerText = sold.toLocaleString();
-            document.getElementById("progress-bar").style.width = percentage + "%";
-        } catch (e) { console.error("Chain sync error"); }
+            
+            document.getElementById("sold-count").innerText = Math.floor(sold).toLocaleString();
+            document.getElementById("progress-bar").style.width = (sold / TOTAL_SUPPLY * 100) + "%";
+        } catch (e) { console.error("Data Sync Failed"); }
     }
-    syncStats();
+    syncChainData();
 
-    // Live Price Engine
-    async function updatePrice() {
-        try {
-            const r = await fetch('https://api.binance.com/api/v3/ticker/price?symbol=ETHUSDT');
-            const d = await r.json();
-            ethPrice = parseFloat(d.price);
-        } catch(e) {}
-    }
-    updatePrice();
-
-    document.getElementById("eth-input").oninput = (e) => {
-        const val = e.target.value || 0;
-        const tokens = (val * ethPrice) / 0.1;
-        document.getElementById("ayb-output").innerText = `ESTIMATED: ${Math.floor(tokens).toLocaleString()} AYB`;
+    // Universal Connection (PC & Mobile Deep Linking)
+    document.getElementById("connect-btn").onclick = async () => {
+        if (window.ethereum) {
+            try {
+                // For PC and MetaMask App Browser
+                await window.ethereum.request({ method: "eth_requestAccounts" });
+                showInterface();
+            } catch (e) { alert("Connection denied"); }
+        } else {
+            // For External Browsers (Chrome/Safari on Mobile)
+            // Redirects user automatically to MetaMask's internal browser
+            const dappUrl = window.location.href.split('://')[1];
+            window.location.href = `https://metamask.app.link/dapp/${dappUrl}`;
+        }
     };
 
-    // Connection Handler
-    async function connect() {
-        if (!window.ethereum) return alert("MetaMask not found!");
-        try {
-            const accounts = await window.ethereum.request({ method: "eth_requestAccounts" });
-            const provider = new ethers.BrowserProvider(window.ethereum);
-            signer = await provider.getSigner();
-
-            const chainId = await window.ethereum.request({ method: "eth_chainId" });
-            if (chainId !== "0xa4b1") {
-                await window.ethereum.request({ method: "wallet_switchEthereumChain", params: [{ chainId: "0xa4b1" }] });
-            }
-
-            document.getElementById("auth-area").style.display = "none";
-            document.getElementById("buy-area").style.display = "block";
-            const s = document.getElementById("status-display");
-            s.style.display = "block";
-            s.style.color = "#00ffa3";
-            s.innerText = "Connection Secure | Ready for Whitelist Check";
-        } catch (e) { alert("Connection Error: Check MetaMask status"); }
+    function showInterface() {
+        document.getElementById("auth-area").style.display = "none";
+        document.getElementById("buy-area").style.display = "block";
+        const s = document.getElementById("status-display");
+        s.style.display = "block";
+        s.style.color = "#00ffa3";
+        s.innerText = "Terminal Connected | Whitelist Verification Active";
     }
 
-    document.getElementById("connect-btn").onclick = connect;
-
-    document.getElementById("confirm-buy").onclick = async () => {
-        try {
-            const ethVal = document.getElementById("eth-input").value;
-            if(!ethVal || ethVal <= 0) return alert("Enter valid ETH amount");
-            
-            const contract = new ethers.Contract(SALE_CONTRACT, ABI, signer);
-            const tx = await contract.buyTokens({ value: ethers.parseEther(ethVal) });
-            await tx.wait();
-            alert("Swap Executed Successfully!");
-        } catch (e) { alert("Execution Failed: Verify Whitelist Status"); }
+    // Live Estimation (Price: 0.1$)
+    document.getElementById("eth-input").oninput = (e) => {
+        const val = e.target.value || 0;
+        const tokens = (val * 2500) / 0.1; // Using approximate ETH price for demo
+        document.getElementById("ayb-output").innerText = `ESTIMATED: ${Math.floor(tokens).toLocaleString()} AYB`;
     };
 </script>
 </body>
