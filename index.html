@@ -3,97 +3,88 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AYB TERMINAL | Secure Node Access</title>
-    
+    <title>AYB TERMINAL | Professional Connect</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/6.7.0/ethers.umd.min.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Inter:wght@400;600&display=swap" rel="stylesheet">
-    
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700&family=Inter:wght@400;600&display=swap" rel="stylesheet">
     <style>
-        :root { --primary: #00ffa3; --bg: #0a0c10; --card: #161b22; }
+        :root { --primary: #00ffa3; --bg: #0a0c10; --card: #161b22; --modal-bg: #1c2128; }
         body { background: var(--bg); color: white; font-family: 'Inter', sans-serif; margin: 0; display: flex; justify-content: center; align-items: center; min-height: 100vh; }
         
-        .card { background: var(--card); border: 1px solid #30363d; padding: 2.2rem; border-radius: 28px; width: 90%; max-width: 420px; text-align: center; border-top: 4px solid var(--primary); }
-        h1 { font-family: 'Orbitron', sans-serif; color: var(--primary); font-size: 1.5rem; letter-spacing: 2px; }
+        /* Modal Overlay */
+        #wallet-modal { position: fixed; inset: 0; background: rgba(0,0,0,0.85); display: none; justify-content: center; align-items: center; z-index: 1000; backdrop-filter: blur(5px); }
+        .modal-content { background: var(--modal-bg); border: 1px solid #30363d; border-radius: 24px; width: 90%; max-width: 380px; padding: 25px; text-align: left; box-shadow: 0 20px 60px rgba(0,0,0,0.5); }
+        .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; font-weight: 600; color: #8b949e; font-size: 0.9rem; }
+        .close-btn { cursor: pointer; font-size: 1.5rem; color: #8b949e; }
         
-        /* Professional Countdown Styles */
-        .timer-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin: 20px 0; }
-        .timer-unit { background: #010409; padding: 10px; border-radius: 12px; border: 1px solid #30363d; }
-        .timer-val { display: block; font-family: 'Orbitron'; color: var(--primary); font-size: 1.2rem; }
-        .timer-label { font-size: 0.6rem; color: #8b949e; text-transform: uppercase; }
+        /* Wallet Options */
+        .wallet-option { display: flex; align-items: center; padding: 15px; border-radius: 12px; border: 1px solid #30363d; margin-bottom: 12px; cursor: pointer; transition: 0.2s; background: #21262d; }
+        .wallet-option:hover { border-color: var(--primary); background: #30363d; }
+        .wallet-icon { width: 32px; height: 32px; margin-right: 15px; border-radius: 6px; }
+        .wallet-name { font-weight: 600; font-size: 1rem; flex-grow: 1; }
+        .status-tag { font-size: 0.7rem; color: #8b949e; background: #0d1117; padding: 4px 8px; border-radius: 6px; }
 
-        .btn { background: var(--primary); color: #000; border: none; padding: 18px; border-radius: 14px; width: 100%; font-weight: 800; cursor: pointer; text-transform: uppercase; transition: 0.3s; }
-        .btn:hover { box-shadow: 0 0 20px rgba(0,255,163,0.4); }
-        
-        .buy-interface { background: #010409; padding: 20px; border-radius: 18px; margin-top: 20px; display: none; text-align: left; border-left: 4px solid var(--primary); }
-        input { background: transparent; border: none; color: white; font-size: 1.6rem; width: 100%; outline: none; margin-top: 5px; }
+        /* Main UI */
+        .card { background: var(--card); border: 1px solid #30363d; padding: 2.5rem; border-radius: 30px; width: 90%; max-width: 400px; text-align: center; border-top: 4px solid var(--primary); }
+        .btn { background: var(--primary); color: #000; border: none; padding: 18px; border-radius: 15px; width: 100%; font-weight: 800; cursor: pointer; text-transform: uppercase; }
+        .timer-val { font-family: 'Orbitron'; color: var(--primary); font-size: 1.2rem; display: block; margin-top: 10px; }
     </style>
 </head>
 <body>
 
 <div class="card">
-    <h1>AYB TERMINAL</h1>
-    
-    <div class="timer-grid">
-        <div class="timer-unit"><span class="timer-val" id="days">90</span><span class="timer-label">Days</span></div>
-        <div class="timer-unit"><span class="timer-val" id="hours">00</span><span class="timer-label">Hrs</span></div>
-        <div class="timer-unit"><span class="timer-val" id="minutes">00</span><span class="timer-label">Min</span></div>
-        <div class="timer-unit"><span class="timer-val" id="seconds">00</span><span class="timer-label">Sec</span></div>
+    <h1 style="font-family: 'Orbitron'; color: var(--primary); font-size: 1.4rem;">AYB TERMINAL</h1>
+    <div id="countdown" class="timer-val">90 DAYS REMAINING</div>
+    <div id="auth-section" style="margin-top: 30px;">
+        <button id="open-modal" class="btn">Connect Wallet</button>
     </div>
+</div>
 
-    <div id="auth-area">
-        <button id="connect-btn" class="btn">Connect Terminal</button>
-        <p id="error-log" style="color: #ff7b72; font-size: 0.75rem; margin-top: 10px; display: none;"></p>
-    </div>
+<div id="wallet-modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <span>Connect a Wallet</span>
+            <span class="close-btn" id="close-modal">&times;</span>
+        </div>
+        
+        <div class="wallet-option" onclick="connectMetaMask()">
+            <img src="https://upload.wikimedia.org/wikipedia/commons/3/36/MetaMask_Logo.svg" class="wallet-icon">
+            <span class="wallet-name">MetaMask</span>
+            <span class="status-tag">Installed</span>
+        </div>
 
-    <div id="buy-area" class="buy-interface">
-        <label style="font-size:0.65rem; color:#8b949e; font-weight:bold;">PAYMENT (ETH)</label>
-        <input type="number" id="eth-input" placeholder="0.0">
-        <button class="btn" style="margin-top:15px;">Purchase Now</button>
+        <div class="wallet-option" style="opacity: 0.5; cursor: not-allowed;">
+            <div style="background: #5a57d6;" class="wallet-icon"></div>
+            <span class="wallet-name">WalletConnect</span>
+            <span class="status-tag">Popular</span>
+        </div>
     </div>
 </div>
 
 <script>
-    // 1. Precise 90-Day Countdown Logic
-    const targetDate = new Date();
-    targetDate.setDate(targetDate.getDate() + 90);
+    const modal = document.getElementById("wallet-modal");
+    document.getElementById("open-modal").onclick = () => modal.style.display = "flex";
+    document.getElementById("close-modal").onclick = () => modal.style.display = "none";
 
-    function updateTimer() {
-        const now = new Date().getTime();
-        const diff = targetDate - now;
-        document.getElementById('days').innerText = Math.floor(diff / (1000 * 60 * 60 * 24));
-        document.getElementById('hours').innerText = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-        document.getElementById('minutes').innerText = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
-        document.getElementById('seconds').innerText = Math.floor((diff % (1000 * 60)) / 1000);
-    }
-    setInterval(updateTimer, 1000);
-
-    // 2. Advanced Connection Logic (PC Handling)
-    document.getElementById("connect-btn").onclick = async () => {
-        const errorLog = document.getElementById("error-log");
-        errorLog.style.display = "none";
-
+    async function connectMetaMask() {
         if (window.ethereum) {
             try {
-                // Force an immediate request - fixes "Action Required" on PC
-                const accounts = await window.ethereum.request({ 
+                // FORCE POPUP on PC to avoid "Action Required" freeze
+                await window.ethereum.request({ 
                     method: "wallet_requestPermissions", 
                     params: [{ eth_accounts: {} }] 
                 });
-                
-                if (accounts) {
-                    document.getElementById("auth-area").style.display = "none";
-                    document.getElementById("buy-area").style.display = "block";
-                }
+                modal.style.display = "none";
+                document.getElementById("open-modal").innerText = "Terminal Online";
+                document.getElementById("open-modal").style.background = "#30363d";
+                document.getElementById("open-modal").style.color = "#00ffa3";
             } catch (e) {
-                errorLog.style.display = "block";
-                errorLog.innerText = "Connection Pending: Please open MetaMask manually and enter your password.";
-                console.error(e);
+                console.error("User rejected or closed");
             }
         } else {
             const dappUrl = window.location.href.split('://')[1];
             window.location.href = `https://metamask.app.link/dapp/${dappUrl}`;
         }
-    };
+    }
 </script>
 </body>
 </html>
