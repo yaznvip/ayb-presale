@@ -3,48 +3,29 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>AYB TERMINAL | INSTITUTIONAL LIVE</title>
-    
+    <title>AYB TERMINAL | V15 ENFORCER</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/6.7.0/ethers.umd.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700;900&family=Inter:wght@400;700;900&display=swap" rel="stylesheet">
-    
     <style>
         :root { --primary: #00ffa3; --bg: #0a0c10; --card: #1d2128; --danger: #ff4a4a; }
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
         body { background: var(--bg); color: white; font-family: 'Inter', sans-serif; margin: 0; display: flex; justify-content: center; align-items: center; min-height: 100vh; overflow-x: hidden; }
-        
         .security-header { position: fixed; top: 0; width: 100%; background: rgba(0,255,163,0.08); border-bottom: 1px solid var(--primary); color: var(--primary); text-align: center; padding: 12px; font-size: 0.7rem; font-weight: 900; letter-spacing: 2px; z-index: 1000; backdrop-filter: blur(10px); text-transform: uppercase; }
-
         .terminal-card { background: var(--card); border: 1px solid #30363d; padding: 2.5rem 2rem; border-radius: 40px; width: 92%; max-width: 420px; text-align: center; border-top: 6px solid var(--primary); box-shadow: 0 50px 100px rgba(0,0,0,0.9); position: relative; }
-        
         h1 { font-family: 'Orbitron'; color: var(--primary); font-size: 1.8rem; letter-spacing: 5px; margin: 15px 0 5px 0; text-shadow: 0 0 25px rgba(0,255,163,0.5); }
-        .version { color: #8b949e; font-size: 0.6rem; font-weight: 900; letter-spacing: 2px; margin-bottom: 30px; display: block; }
-
-        /* REAL-TIME SUPPLY TRACKER */
         .supply-container { background: #0d1117; padding: 20px; border-radius: 25px; border: 1px solid #30363d; margin-bottom: 25px; box-shadow: inset 0 0 20px black; }
         .supply-info { display: flex; justify-content: space-between; font-size: 0.75rem; font-weight: 900; color: #8b949e; margin-bottom: 12px; text-transform: uppercase; }
         .bar-bg { background: #1c2128; height: 16px; border-radius: 20px; overflow: hidden; border: 1px solid #484f58; }
         .bar-fill { background: var(--primary); width: 100%; height: 100%; transition: 2.5s cubic-bezier(0.2, 0.8, 0.2, 1); box-shadow: 0 0 25px var(--primary); }
-
-        /* 90-DAY PRE-SALE TIMER */
         .timer-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-bottom: 30px; }
         .t-box { background: #010409; padding: 15px 2px; border-radius: 18px; border: 1px solid #30363d; }
         .t-val { display: block; font-family: 'Orbitron'; color: var(--primary); font-size: 1.3rem; font-weight: 900; }
         .t-lbl { font-size: 0.5rem; color: #8b949e; text-transform: uppercase; font-weight: 800; }
-
         .btn-action { background: var(--primary); color: #000; border: none; padding: 24px; border-radius: 22px; width: 100%; font-weight: 900; cursor: pointer; text-transform: uppercase; font-size: 1.1rem; transition: 0.4s; box-shadow: 0 15px 35px rgba(0,255,163,0.3); }
-        .btn-action:active { transform: scale(0.96); opacity: 0.8; }
-        .btn-action:disabled { background: #21262d; color: #484f58; cursor: not-allowed; box-shadow: none; }
-
-        /* ACTIVE CONTRACT INTERFACE */
         #active-portal { display: none; background: #010409; padding: 25px; border-radius: 30px; text-align: left; margin-top: 25px; border-left: 6px solid var(--primary); animation: slideIn 0.5s ease; }
         @keyframes slideIn { from { transform: translateY(30px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
-
-        .input-group { margin-bottom: 25px; }
-        label { font-size: 0.65rem; color: #8b949e; font-weight: 900; text-transform: uppercase; letter-spacing: 1px; }
         input { background: transparent; border: none; color: white; font-size: 2.2rem; width: 100%; outline: none; font-weight: 900; margin-top: 10px; }
-        .val-out { color: var(--primary); font-family: 'Orbitron'; font-size: 1.8rem; display: block; margin-top: 10px; }
-        .msg-log { font-size: 0.65rem; color: var(--danger); margin-top: 15px; text-align: center; font-weight: 900; min-height: 18px; }
+        .msg-log { font-size: 0.65rem; color: var(--danger); margin-top: 15px; text-align: center; font-weight: 900; min-height: 18px; text-transform: uppercase; }
     </style>
 </head>
 <body>
@@ -53,42 +34,26 @@
 
 <div class="terminal-card">
     <div class="supply-container">
-        <div class="supply-info">
-            <span>Market Availability</span>
-            <span id="supply-text" style="color:var(--primary)">500,000 AYB</span>
-        </div>
+        <div class="supply-info"><span>Market Availability</span><span id="supply-text" style="color:var(--primary)">500,000 AYB</span></div>
         <div class="bar-bg"><div id="supply-bar" class="bar-fill"></div></div>
     </div>
-
     <h1>AYB TERMINAL</h1>
-    <span class="version">V14.0 INSTITUTIONAL ENGINE</span>
-
     <div class="timer-grid">
         <div class="t-box"><span id="d" class="t-val">90</span><span class="t-lbl">Days</span></div>
         <div class="t-box"><span id="h" class="t-val">00</span><span class="t-lbl">Hrs</span></div>
         <div class="t-box"><span id="m" class="t-val">00</span><span class="t-lbl">Min</span></div>
         <div class="t-box"><span id="s" class="t-val">00</span><span class="t-lbl">Sec</span></div>
     </div>
-
-    <div id="connect-ui">
-        <button id="master-connect" onclick="initiateBridge()" class="btn-action">Synchronize Wallet</button>
-    </div>
-
+    <div id="connect-ui"><button id="master-connect" onclick="initiateBridge()" class="btn-action">Synchronize Wallet</button></div>
     <div id="active-portal">
-        <div class="input-group">
-            <div style="display:flex; justify-content:space-between; align-items:center;">
-                <label>Deposit (ETH)</label>
-                <span id="real-balance" style="font-size:0.8rem; color:var(--primary); font-weight:900;">0.0000</span>
-            </div>
-            <input type="number" id="eth-amount" placeholder="0.0" oninput="calculateAllocation()">
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+            <label style="font-size:0.65rem; color:#8b949e; font-weight:900;">DEPOSIT (ETH)</label>
+            <span id="real-balance" style="font-size:0.8rem; color:var(--primary); font-weight:900;">0.0000</span>
         </div>
-        
-        <div class="input-group">
-            <label>Allocation (AYB)</label>
-            <span id="ayb-result" class="val-out">0</span>
-        </div>
-        
-        <button id="buy-trigger" class="btn-action" onclick="signTransaction()" disabled>Execute Contract</button>
+        <input type="number" id="eth-amount" placeholder="0.0" oninput="calculateAllocation()">
+        <label style="font-size:0.65rem; color:#8b949e; font-weight:900; margin-top:20px; display:block;">ALLOCATION (AYB)</label>
+        <span id="ayb-result" style="color:var(--primary); font-family:'Orbitron'; font-size:1.8rem; display:block; margin-top:10px;">0</span>
+        <button id="buy-trigger" class="btn-action" style="margin-top:25px;" onclick="signTransaction()" disabled>Execute Contract</button>
         <div id="log-window" class="msg-log"></div>
     </div>
 </div>
@@ -98,99 +63,73 @@
     let maxCap = 500000;
     let totalSold = 0;
     const TREASURY = "0x066bbf27694982662cEAb0072793132B03027F47";
+    const ARB_CHAIN_ID = '0xa4b1';
 
-    // 1. MOBILE CHROME BRIDGE (The Final Solution)
     async function initiateBridge() {
-        const btn = document.getElementById('master-connect');
-        btn.innerText = "ESTABLISHING...";
-
         if (window.ethereum) {
             try {
                 const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
                 const provider = new ethers.BrowserProvider(window.ethereum);
                 const balance = await provider.getBalance(accounts[0]);
-                
-                // Real Data Injection
                 document.getElementById('real-balance').innerText = parseFloat(ethers.formatEther(balance)).toFixed(5) + " ETH";
                 document.getElementById('connect-ui').style.display = 'none';
                 document.getElementById('active-portal').style.display = 'block';
                 syncBlockchainData();
-                
-                window.ethereum.on('accountsChanged', () => window.location.reload());
-            } catch (e) { 
-                btn.innerText = "LINK FAILED - RETRY";
-            }
+            } catch (e) { alert("Connection Failed"); }
         } else {
-            // Force redirection to MetaMask internal browser
-            const targetUrl = window.location.href.replace(/^https?:\/\//, '');
-            window.location.href = `https://metamask.app.link/dapp/${targetUrl}`;
+            window.location.href = `https://metamask.app.link/dapp/${window.location.href.replace(/^https?:\/\//, '')}`;
         }
     }
 
-    // 2. LIVE BLOCKCHAIN SYNC (Supply Engine)
     async function syncBlockchainData() {
         try {
             const provider = new ethers.JsonRpcProvider("https://arb1.arbitrum.io/rpc");
             const balance = await provider.getBalance(TREASURY);
-            const ethInTreasury = parseFloat(ethers.formatEther(balance));
-            
-            totalSold = Math.floor((ethInTreasury * ethUsd) / 0.1);
-            let remaining = maxCap - totalSold;
-            if (remaining < 0) remaining = 0;
-
-            document.getElementById('supply-text').innerText = remaining.toLocaleString() + " AYB";
-            document.getElementById('supply-bar').style.width = (remaining / maxCap * 100) + "%";
-        } catch (e) { console.error("Sync Failure"); }
+            totalSold = Math.floor((parseFloat(ethers.formatEther(balance)) * ethUsd) / 0.1);
+            let rem = maxCap - totalSold; if (rem < 0) rem = 0;
+            document.getElementById('supply-text').innerText = rem.toLocaleString() + " AYB";
+            document.getElementById('supply-bar').style.width = (rem / maxCap * 100) + "%";
+        } catch (e) { console.error("Sync Error"); }
     }
 
-    // 3. TRANSACTION LOGIC & CAP SECURITY
     function calculateAllocation() {
         const val = document.getElementById('eth-amount').value;
-        const result = document.getElementById('ayb-result');
-        const trigger = document.getElementById('buy-trigger');
-        const log = document.getElementById('log-window');
-        
         const tokens = Math.floor((val * ethUsd) / 0.1);
-        result.innerText = tokens.toLocaleString();
-        
-        const remaining = maxCap - totalSold;
-
-        if (tokens > remaining) {
-            trigger.disabled = true;
-            log.innerText = "ERROR: ALLOCATION EXCEEDS REMAINING SUPPLY";
-        } else if (val <= 0) {
-            trigger.disabled = true;
-            log.innerText = "";
-        } else {
-            trigger.disabled = false;
-            log.innerText = "";
-        }
+        document.getElementById('ayb-result').innerText = tokens.toLocaleString();
+        document.getElementById('buy-trigger').disabled = (val <= 0 || tokens > (maxCap - totalSold));
     }
 
     async function signTransaction() {
+        const log = document.getElementById('log-window');
         try {
             const provider = new ethers.BrowserProvider(window.ethereum);
+            const network = await provider.getNetwork();
+            if (network.chainId !== 42161n) {
+                await window.ethereum.request({ method: 'wallet_switchEthereumChain', params: [{ chainId: ARB_CHAIN_ID }] });
+            }
             const signer = await provider.getSigner();
-            await signer.sendTransaction({
+            const tx = await signer.sendTransaction({
                 to: TREASURY,
-                value: ethers.parseEther(document.getElementById('eth-amount').value)
+                value: ethers.parseEther(document.getElementById('eth-amount').value),
+                gasLimit: 120000 // Force Popup
             });
-        } catch (e) { document.getElementById('log-window').innerText = "SIGNATURE REJECTED BY USER"; }
+            log.innerText = "TRANSACTION BROADCASTED";
+            log.style.color = "#00ffa3";
+        } catch (e) { 
+            log.innerText = e.code === 'ACTION_REJECTED' ? "REJECTED BY USER" : "INSUFFICIENT FUNDS/GAS";
+        }
     }
 
-    // Core Initialization
-    setInterval(syncBlockchainData, 10000); 
-    const launchDate = new Date(); launchDate.setDate(launchDate.getDate() + 90);
+    setInterval(syncBlockchainData, 10000);
+    const launch = new Date(); launch.setDate(launch.getDate() + 90);
     setInterval(() => {
-        const diff = launchDate - new Date();
-        document.getElementById('d').innerText = Math.floor(diff / 864e5);
-        document.getElementById('h').innerText = Math.floor((diff % 864e5) / 36e5);
-        document.getElementById('m').innerText = Math.floor((diff % 36e5) / 6e4);
-        document.getElementById('s').innerText = Math.floor((diff % 6e4) / 1000);
+        const d = launch - new Date();
+        document.getElementById('d').innerText = Math.floor(d / 864e5);
+        document.getElementById('h').innerText = Math.floor((d % 864e5) / 36e5);
+        document.getElementById('m').innerText = Math.floor((d % 36e5) / 6e4);
+        document.getElementById('s').innerText = Math.floor((d % 6e4) / 1000);
     }, 1000);
-
-    fetch('https://api.binance.com/api/v3/ticker/price?symbol=ETHUSDT')
-        .then(r => r.json()).then(d => ethUsd = parseFloat(d.price));
+    fetch('https://api.binance.com/api/v3/ticker/price?symbol=ETHUSDT').then(r => r.json()).then(d => ethUsd = parseFloat(d.price));
 </script>
 </body>
 </html>
