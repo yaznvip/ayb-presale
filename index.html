@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>AYB TERMINAL | Phase 2 Node</title>
     
-    <script src="https://cdn.jsdelivr.net/npm/ethers@6.7.0/dist/ethers.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/6.7.0/ethers.umd.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Inter:wght@400;600&display=swap" rel="stylesheet">
     
     <style>
@@ -14,18 +14,14 @@
         .card { background: var(--card); border: 1px solid #30363d; padding: 2.5rem; border-radius: 24px; width: 90%; max-width: 400px; box-shadow: 0 25px 50px rgba(0,0,0,0.6); position: relative; border-top: 4px solid var(--primary); }
         h1 { font-family: 'Orbitron', sans-serif; color: var(--primary); font-size: 1.5rem; margin-bottom: 5px; letter-spacing: 2px; }
         .subtitle { color: #8b949e; font-size: 0.75rem; margin-bottom: 20px; text-transform: uppercase; }
-
         .timer-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin: 25px 0; padding: 15px; background: rgba(0,255,163,0.03); border-radius: 15px; border: 1px solid #30363d; }
         .t-num { display: block; font-size: 1.3rem; font-weight: bold; color: var(--primary); font-family: 'Orbitron'; }
         .t-lab { font-size: 0.6rem; color: #8b949e; text-transform: uppercase; font-weight: 600; }
-
         .btn { background: var(--primary); color: #000; border: none; padding: 18px; border-radius: 12px; width: 100%; font-weight: 800; cursor: pointer; transition: 0.3s ease; font-size: 1rem; text-transform: uppercase; letter-spacing: 1px; }
         .btn:hover { box-shadow: 0 0 25px rgba(0,255,163,0.5); transform: translateY(-3px); }
-        
         .buy-interface { background: #010409; border: 1px solid #30363d; padding: 20px; border-radius: 16px; margin: 20px 0; text-align: left; display: none; animation: slideIn 0.4s ease-out; }
         input { background: transparent; border: none; color: white; font-size: 1.5rem; width: 100%; outline: none; font-weight: bold; margin-top: 5px; }
         #status-display { margin-top: 15px; font-size: 0.8rem; display: none; padding: 10px; border-radius: 8px; border: 1px solid; }
-
         @keyframes slideIn { from { opacity: 0; transform: translateY(15px); } to { opacity: 1; transform: translateY(0); } }
     </style>
 </head>
@@ -57,9 +53,8 @@
 </div>
 
 <script>
-    // --- TIMER ENGINE ---
+    // 1. Timer logic
     const TARGET = new Date("April 21, 2026 23:59:59").getTime();
-
     function updateTimer() {
         const now = new Date().getTime();
         const gap = TARGET - now;
@@ -73,10 +68,10 @@
     setInterval(updateTimer, 1000);
     updateTimer();
 
-    // --- WEB3 CONFIG ---
+    // 2. Web3 Logic
     const ADDR = "0xE6bBb6A5904045C4807C9139Ad2E7C5EcFCB0F94";
     const ABI = ["function buyTokens() external payable"];
-    const CHAIN = "0xa4b1"; // Arbitrum One
+    const CHAIN = "0xa4b1"; 
 
     const cBtn = document.getElementById("connect-btn");
     const sBox = document.getElementById("status-display");
@@ -94,66 +89,44 @@
     };
 
     cBtn.onclick = async () => {
-        // Step 1: Detect Provider
         const p = window.ethereum;
         
         if (!p) {
-            notify("Redirecting to MetaMask...", false);
-            // Constructing Deep Link carefully to avoid 404
-            const rawUrl = window.location.href.split('://')[1];
-            window.location.href = "https://metamask.app.link/dapp/" + rawUrl;
+            notify("Redirecting to MetaMask Mobile...", false);
+            // DIRECT LINK FIX for ayb-presale
+            const dappUrl = "yaznvip.github.io/ayb-presale/";
+            window.location.href = "https://metamask.app.link/dapp/" + dappUrl;
             return;
         }
 
         try {
             notify("Connecting...", false);
+            await p.request({ method: "eth_requestAccounts" });
+            const chainId = await p.request({ method: "eth_chainId" });
             
-            // Step 2: Request Accounts
-            const accounts = await p.request({ method: "eth_requestAccounts" });
-            if (accounts.length === 0) throw new Error("No accounts found");
-
-            // Step 3: Check/Switch Chain
-            const currentChain = await p.request({ method: "eth_chainId" });
-            if (currentChain !== CHAIN) {
-                try {
-                    await p.request({
-                        method: "wallet_switchEthereumChain",
-                        params: [{ chainId: CHAIN }],
-                    });
-                } catch (err) {
-                    notify("Please switch to Arbitrum One", true);
-                    return;
-                }
+            if (chainId !== CHAIN) {
+                await p.request({ method: "wallet_switchEthereumChain", params: [{ chainId: CHAIN }] });
             }
 
-            // Step 4: Initialize Ethers
-            const provider = new ethers.BrowserProvider(p);
-            signer = await provider.getSigner();
-            
+            signer = await new ethers.BrowserProvider(p).getSigner();
             document.getElementById("auth-area").style.display = "none";
             document.getElementById("buy-area").style.display = "block";
             notify("Terminal Online", false);
         } catch (e) { 
-            console.error(e);
-            notify(e.message || "Connection Failed", true); 
+            notify(e.message, true); 
         }
     };
 
     document.getElementById("confirm-buy").onclick = async () => {
         try {
             const val = document.getElementById("eth-input").value;
-            if(!val || val <= 0) return notify("Enter valid amount", true);
-            
-            notify("Processing...", false);
+            if(!val || val <= 0) return notify("Invalid amount", true);
+            notify("Confirming...", false);
             const contract = new ethers.Contract(ADDR, ABI, signer);
             const tx = await contract.buyTokens({ value: ethers.parseEther(val) });
-            
-            notify("Pending Confirmation...", false);
             await tx.wait();
-            notify("Transaction Success!", false);
-        } catch (e) { 
-            notify(e.reason || "Transaction Denied", true); 
-        }
+            notify("Success!", false);
+        } catch (e) { notify(e.reason || "Denied", true); }
     };
 </script>
 </body>
