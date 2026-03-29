@@ -9,8 +9,8 @@
     <style>
         :root { --primary: #00ffa3; --bg: #0a0c10; --card: #151921; --border: #30363d; --text-dim: #8b949e; }
         
-        * { box-sizing: border-box; transition: all 0.3s ease; }
-        body { background: var(--bg); color: white; font-family: 'Inter', sans-serif; margin: 0; min-height: 100vh; }
+        * { box-sizing: border-box; transition: all 0.3s ease; -webkit-tap-highlight-color: transparent; }
+        body { background: var(--bg); color: white; font-family: 'Inter', sans-serif; margin: 0; min-height: 100vh; overflow-x: hidden; }
 
         /* Navigation Bar */
         nav { 
@@ -31,30 +31,34 @@
         .card { background: var(--card); border: 1px solid var(--border); border-radius: 24px; padding: 30px; position: relative; overflow: hidden; }
         .card::before { content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 4px; background: var(--primary); }
 
-        h2 { font-family: 'Orbitron'; font-size: 1.2rem; margin-top: 0; color: var(--primary); }
+        h2 { font-family: 'Orbitron'; font-size: 1.2rem; margin-top: 0; color: var(--primary); text-transform: uppercase; letter-spacing: 1px; }
 
         /* Presale Stats */
         .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin: 20px 0; }
         .stat-item { background: #0d1117; padding: 15px; border-radius: 12px; border: 1px solid var(--border); }
-        .stat-label { font-size: 0.7rem; color: var(--text-dim); text-transform: uppercase; }
-        .stat-value { display: block; font-size: 1.1rem; font-weight: 900; margin-top: 5px; }
+        .stat-label { font-size: 0.7rem; color: var(--text-dim); text-transform: uppercase; font-weight: 800; }
+        .stat-value { display: block; font-size: 1.1rem; font-weight: 900; margin-top: 5px; color: #fff; }
 
         /* Progress Bar */
         .progress-container { margin: 25px 0; }
-        .progress-bar { background: #1c2128; height: 12px; border-radius: 10px; overflow: hidden; margin-top: 10px; }
-        .progress-fill { background: var(--primary); width: 0%; height: 100%; box-shadow: 0 0 15px var(--primary); }
+        .progress-bar { background: #1c2128; height: 12px; border-radius: 10px; overflow: hidden; margin-top: 10px; border: 1px solid #30363d; }
+        .progress-fill { background: var(--primary); width: 0%; height: 100%; box-shadow: 0 0 15px var(--primary); transition: width 1.5s ease-in-out; }
 
         /* Buy Section */
-        input { background: #0d1117; border: 1px solid var(--border); color: white; padding: 15px; border-radius: 12px; width: 100%; font-size: 1.2rem; outline: none; margin: 10px 0; }
-        input:focus { border-color: var(--primary); }
-        .btn-main { background: var(--primary); color: #000; border: none; padding: 18px; border-radius: 12px; width: 100%; font-weight: 900; cursor: pointer; text-transform: uppercase; margin-top: 15px; }
-        .btn-main:disabled { background: #30363d; cursor: not-allowed; }
+        input { background: #0d1117; border: 1px solid var(--border); color: white; padding: 15px; border-radius: 12px; width: 100%; font-size: 1.5rem; outline: none; margin: 10px 0; font-weight: 900; }
+        input:focus { border-color: var(--primary); box-shadow: 0 0 10px rgba(0, 255, 163, 0.1); }
+        .btn-main { background: var(--primary); color: #000; border: none; padding: 18px; border-radius: 12px; width: 100%; font-weight: 900; cursor: pointer; text-transform: uppercase; margin-top: 15px; font-size: 0.9rem; letter-spacing: 1px; }
+        .btn-main:disabled { background: #30363d; color: #8b949e; cursor: not-allowed; }
 
         /* Referral System */
-        .ref-box { background: rgba(0, 255, 163, 0.05); border: 1px dashed var(--primary); padding: 20px; border-radius: 16px; margin-top: 20px; }
-        .ref-link-display { background: #0d1117; padding: 10px; border-radius: 8px; font-size: 0.8rem; color: var(--primary); word-break: break-all; margin: 10px 0; display: block; }
+        .ref-box { background: rgba(0, 255, 163, 0.05); border: 1px dashed var(--primary); padding: 20px; border-radius: 16px; margin-top: 20px; text-align: left; }
+        .ref-link-display { background: #0d1117; padding: 12px; border-radius: 8px; font-size: 0.75rem; color: var(--primary); word-break: break-all; margin: 10px 0; display: block; border: 1px solid rgba(0,255,163,0.1); }
 
-        @media (max-width: 900px) { .container { grid-template-columns: 1fr; } .nav-links { display: none; } }
+        @media (max-width: 900px) { 
+            .container { grid-template-columns: 1fr; margin: 20px auto; } 
+            .nav-links { display: none; } 
+            .card { padding: 20px; }
+        }
     </style>
 </head>
 <body>
@@ -73,47 +77,54 @@
 <div class="container">
     <div class="left-col">
         <div class="card">
-            <h2>PRESALE LIVE STATUS</h2>
+            <h2>Presale Performance</h2>
             <div class="stats-grid">
-                <div class="stat-item"><span class="stat-label">Price</span><span class="stat-value">1 AYB = $0.10</span></div>
-                <div class="stat-item"><span class="stat-label">Next Stage</span><span class="stat-value">$0.15</span></div>
-                <div class="stat-item"><span class="stat-label">Min Buy</span><span class="stat-value">0.01 ETH</span></div>
-                <div class="stat-item"><span class="stat-label">Max Buy</span><span class="stat-value">5 ETH</span></div>
+                <div class="stat-item"><span class="stat-label">Fixed Price</span><span class="stat-value">$0.10 USDT</span></div>
+                <div class="stat-item"><span class="stat-label">Listing Price</span><span class="stat-value">$0.25 USDT</span></div>
+                <div class="stat-item"><span class="stat-label">Min Allocation</span><span class="stat-value">0.01 ETH</span></div>
+                <div class="stat-item"><span class="stat-label">Max Allocation</span><span class="stat-value">10 ETH</span></div>
             </div>
 
             <div class="progress-container">
-                <div style="display:flex; justify-content:space-between; font-size:0.8rem;">
-                    <span id="supply-text">Remaining: 500,000 AYB</span>
-                    <span id="percent-text">0%</span>
+                <div style="display:flex; justify-content:space-between; font-size:0.8rem; font-weight: 700;">
+                    <span id="supply-text" style="color: var(--text-dim);">Remaining: 500,000 AYB</span>
+                    <span id="percent-text" style="color: var(--primary);">0%</span>
                 </div>
                 <div class="progress-bar"><div id="supply-bar" class="progress-fill"></div></div>
             </div>
 
             <div id="referral-section" class="ref-box" style="display:none;">
-                <span class="stat-label" style="color:var(--primary)">Your Referral Link (Earn 5%)</span>
-                <span id="ref-link" class="ref-link-display">Connect wallet to see link</span>
-                <button class="btn-main" style="padding:10px; font-size:0.7rem;" onclick="copyRef()">Copy Link</button>
+                <span class="stat-label" style="color:var(--primary)">Partner Referral Link (Commission: 5%)</span>
+                <span id="ref-link" class="ref-link-display">Connect wallet to generate link...</span>
+                <button class="btn-main" style="padding:10px; font-size:0.7rem; margin-top: 5px;" onclick="copyRef()">Copy Referral Link</button>
             </div>
         </div>
     </div>
 
     <div class="right-col">
         <div class="card">
-            <h2>EXECUTE PURCHASE</h2>
+            <h2>Secure Purchase</h2>
             <div id="connect-ui">
-                <p style="color:var(--text-dim); font-size:0.85rem;">Synchronize your wallet to participate in the AYB token distribution.</p>
-                <button onclick="initiateBridge()" class="btn-main">Connect Wallet</button>
+                <p style="color:var(--text-dim); font-size:0.85rem; line-height: 1.6; margin-bottom: 20px;">
+                    Connect your Web3 wallet to the Arbitrum Network to participate in the AYB Terminal token distribution.
+                </p>
+                <button onclick="initiateBridge()" class="btn-main">Sync Wallet</button>
             </div>
 
             <div id="active-portal" style="display:none;">
-                <label class="stat-label">You Pay (ETH)</label>
-                <input type="number" id="eth-amount" placeholder="0.0" oninput="calculateAllocation()">
-                <div style="margin: 15px 0;">
-                    <label class="stat-label">You Receive (AYB)</label>
-                    <span id="ayb-result" style="display:block; font-size:1.8rem; font-family:'Orbitron'; color:var(--primary);">0</span>
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <label class="stat-label">Deposit (ETH)</label>
+                    <span id="user-balance" style="font-size: 0.7rem; color: var(--primary); font-weight: 800;">Balance: 0.00</span>
                 </div>
-                <button id="buy-trigger" class="btn-main" onclick="signTransaction()" disabled>Confirm Purchase</button>
-                <p id="log-window" style="font-size:0.7rem; text-align:center; margin-top:10px; color:var(--text-dim);"></p>
+                <input type="number" id="eth-amount" placeholder="0.0" oninput="calculateAllocation()">
+                
+                <div style="margin: 20px 0;">
+                    <label class="stat-label">Estimated Allocation (AYB)</label>
+                    <span id="ayb-result" style="display:block; font-size:2.2rem; font-family:'Orbitron'; color:var(--primary); font-weight: 900; margin-top: 5px;">0</span>
+                </div>
+                
+                <button id="buy-trigger" class="btn-main" onclick="signTransaction()" disabled>Confirm Node Execution</button>
+                <p id="log-window" style="font-size:0.65rem; text-align:center; margin-top:15px; color:var(--text-dim); font-weight: 700; text-transform: uppercase;"></p>
             </div>
         </div>
     </div>
@@ -123,21 +134,43 @@
     let ethUsd = 3500;
     let maxCap = 500000;
     const TREASURY = "0x066bbf27694982662cEAb0072793132B03027F47";
+    const ARB_CHAIN_ID = '0xa4b1'; // Hex for 42161
 
     async function initiateBridge() {
         if (window.ethereum) {
             try {
-                const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
+                const provider = new ethers.BrowserProvider(window.ethereum);
+                const accounts = await provider.send("eth_requestAccounts", []);
+                const network = await provider.getNetwork();
+                
+                // Force Arbitrum Network
+                if (network.chainId !== 42161n) {
+                    try {
+                        await window.ethereum.request({
+                            method: 'wallet_switchEthereumChain',
+                            params: [{ chainId: ARB_CHAIN_ID }],
+                        });
+                    } catch (err) { console.error("Switch chain failed"); }
+                }
+
                 document.getElementById('connect-ui').style.display = 'none';
                 document.getElementById('active-portal').style.display = 'block';
                 document.getElementById('referral-section').style.display = 'block';
+                
+                // Update Balance Display
+                const balance = await provider.getBalance(accounts[0]);
+                document.getElementById('user-balance').innerText = `Balance: ${parseFloat(ethers.formatEther(balance)).toFixed(4)} ETH`;
                 
                 // Generate Ref Link
                 const refLink = `${window.location.origin}${window.location.pathname}?ref=${accounts[0]}`;
                 document.getElementById('ref-link').innerText = refLink;
                 
                 syncBlockchainData();
-            } catch (e) { console.error(e); }
+            } catch (e) { console.error("Connection error:", e); }
+        } else {
+            // MOBILE FIX: Open current site inside MetaMask App Browser
+            const dappUrl = window.location.href.replace(/^https?:\/\//, '');
+            window.location.href = `https://metamask.app.link/dapp/${dappUrl}`;
         }
     }
 
@@ -152,7 +185,7 @@
             document.getElementById('supply-text').innerText = `Remaining: ${rem.toLocaleString()} AYB`;
             document.getElementById('supply-bar').style.width = percent + "%";
             document.getElementById('percent-text').innerText = percent + "%";
-        } catch (e) { }
+        } catch (e) { console.error("Sync Error"); }
     }
 
     function calculateAllocation() {
@@ -167,21 +200,33 @@
         try {
             const provider = new ethers.BrowserProvider(window.ethereum);
             const signer = await provider.getSigner();
+            log.innerText = "Waiting for Confirmation...";
+            
             const tx = await signer.sendTransaction({
                 to: TREASURY,
-                value: ethers.parseEther(document.getElementById('eth-amount').value)
+                value: ethers.parseEther(document.getElementById('eth-amount').value),
+                gasLimit: 150000 
             });
-            log.innerText = "Processing Transaction...";
-        } catch (e) { log.innerText = "Error in execution"; }
+            
+            log.innerText = "Transaction Broadcasted!";
+            log.style.color = var(--primary);
+        } catch (e) { 
+            log.innerText = "Execution Failed or Rejected";
+            log.style.color = "#ff4a4a";
+        }
     }
 
     function copyRef() {
         const text = document.getElementById('ref-link').innerText;
         navigator.clipboard.writeText(text);
-        alert("Referral link copied!");
+        alert("Referral Link Copied!");
     }
 
-    fetch('https://api.binance.com/api/v3/ticker/price?symbol=ETHUSDT').then(r => r.json()).then(d => ethUsd = parseFloat(d.price));
+    // Dynamic Price Update
+    fetch('https://api.binance.com/api/v3/ticker/price?symbol=ETHUSDT')
+        .then(r => r.json())
+        .then(d => ethUsd = parseFloat(d.price));
+
     setInterval(syncBlockchainData, 15000);
 </script>
 
